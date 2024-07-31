@@ -1,3 +1,15 @@
+local players = game:GetService("Players")
+game.StarterGui:SetCore("SendNotification", {
+
+    Title = "Welcome";
+
+    Text = "Welcome";
+     
+     Icon = "put rbxassetid decals";
+
+     Duration = 5
+})
+
 -- Fly Script
 
 local player = game.Players.LocalPlayer
