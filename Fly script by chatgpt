@@ -3,7 +3,7 @@ game.StarterGui:SetCore("SendNotification", {
 
     Title = "Made by SOPHIE RAIN(chatgpt) and z4trox";
 
-    Text = "Press E TO ENABLE FLY MOD(ONLY PC WORK SOLARA";
+    Text = "Press E TO ENABLE FLY MOD(ONLY PC WORK SOLARA)";
      
      Icon = "put rbxassetid decals";
 
