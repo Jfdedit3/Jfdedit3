@@ -1,9 +1,9 @@
 local players = game:GetService("Players")
 game.StarterGui:SetCore("SendNotification", {
 
-    Title = "Welcome";
+    Title = "Made by SOPHIE RAIN(chatgpt) and z4trox";
 
-    Text = "Welcome";
+    Text = "Press E TO ENABLE FLY MOD(ONLY PC WORK SOLARA";
      
      Icon = "put rbxassetid decals";
 
