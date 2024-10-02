@@ -216,7 +216,7 @@ New.MouseButton1Click:Connect(function()
 	starteffect()
 	pcall(function()
 	  wait(3)
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/Jfdedit3/honoka-executor/refs/heads/main/Mada%20hub%20v1'))()
+		loadstring(game:HttpGet('https://rawscripts.net/raw/Universal-Script-Mada-hub-v2-17918'))()
 	end)
 end)
 
