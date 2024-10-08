@@ -1,0 +1,106 @@
+-- Création de l'interface GUI
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Création du ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ScriptExecutorGUI"
+screenGui.Parent = playerGui
+
+-- Création du cadre principal (Frame)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 250)  -- Taille agrandie
+mainFrame.Position = UDim2.new(0.5, -200, -1, 0)  -- Position initiale au-dessus de l'écran
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.Parent = screenGui
+
+-- Ajouter des coins arrondis au cadre principal
+local mainFrameCorner = Instance.new("UICorner")
+mainFrameCorner.Parent = mainFrame
+
+-- Création d'une TextBox pour entrer le script
+local scriptBox = Instance.new("TextBox")
+scriptBox.Size = UDim2.new(1, -20, 0, 150)  -- Agrandissement de la taille de la TextBox
+scriptBox.Position = UDim2.new(0, 10, 0, 10)
+scriptBox.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+scriptBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+scriptBox.Font = Enum.Font.SourceSans
+scriptBox.PlaceholderText = "Entrez le script Lua ici..."
+scriptBox.TextSize = 18
+scriptBox.MultiLine = true -- Permet d'avoir plusieurs lignes
+scriptBox.TextWrapped = true -- Enveloppe le texte
+scriptBox.ClearTextOnFocus = false -- Empêche le texte de disparaître lors de la focalisation
+scriptBox.Parent = mainFrame
+
+-- Ajouter des coins arrondis à la TextBox
+local scriptBoxCorner = Instance.new("UICorner")
+scriptBoxCorner.Parent = scriptBox
+
+-- Création d'un bouton pour exécuter le script
+local executeButton = Instance.new("TextButton")
+executeButton.Size = UDim2.new(1, -20, 0, 30)  -- Taille du bouton inchangée
+executeButton.Position = UDim2.new(0, 10, 0, 170) -- Position du bouton ajustée
+executeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+executeButton.Text = "Exécuter le script"
+executeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+executeButton.Font = Enum.Font.SourceSans
+executeButton.TextSize = 18
+executeButton.Parent = mainFrame
+
+-- Ajouter des coins arrondis au bouton d'exécution
+local executeButtonCorner = Instance.new("UICorner")
+executeButtonCorner.Parent = executeButton
+
+-- Création du bouton pour minimiser/restaurer le GUI à l'extérieur du cadre
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 80, 0, 30) -- Taille du bouton Toggle
+toggleButton.Position = UDim2.new(0, 10, 0, 10) -- Position à ajuster sur l'écran
+toggleButton.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+toggleButton.Text = "Minimiser"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.SourceSans
+toggleButton.TextSize = 18
+toggleButton.Parent = screenGui -- Ajout au ScreenGui directement
+
+-- Ajouter des coins arrondis au bouton Toggle
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.Parent = toggleButton
+
+-- Variable pour suivre l'état du Toggle
+local isMinimized = false
+
+-- Fonction pour gérer le clic sur le bouton Toggle
+toggleButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized -- Inverse l'état
+    if isMinimized then
+        -- Minimiser le cadre en le déplaçant vers le bas
+        mainFrame.Position = UDim2.new(0.5, -200, 1, 0) -- Position en bas de l'écran
+        toggleButton.Text = "Restaurer" -- Changer le texte du bouton
+    else
+        mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125) -- Restaurer la position centrale
+        toggleButton.Text = "Minimiser" -- Changer le texte du bouton
+    end
+end)
+
+-- Afficher le cadre principal en glissant depuis le haut
+mainFrame.Position = UDim2.new(0.5, -200, 0, 0) -- Commence à la position d'en haut
+mainFrame.Visible = true -- Rendre le cadre visible
+wait(0.1) -- Attendre un court instant pour simuler le glissement
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125) -- Glisse vers le bas
+
+-- Fonction pour exécuter le script Lua entré dans la TextBox
+executeButton.MouseButton1Click:Connect(function()
+    local scriptCode = scriptBox.Text
+    if scriptCode and scriptCode ~= "" then
+        local success, err = pcall(function()
+            loadstring(scriptCode)()
+        end)
+        if success then
+            print("Le script a été exécuté avec succès.")
+        else
+            print("Erreur lors de l'exécution du script : " .. err)
+        end
+    else
+        print("Veuillez entrer un script Lua valide.")
+    end
+end)
