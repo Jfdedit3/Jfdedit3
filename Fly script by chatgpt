@@ -1,16 +1,6 @@
-local players = game:GetService("Players")
-game.StarterGui:SetCore("SendNotification", {
-
-    Title = "Made by SOPHIE RAIN and z4trox";
-
-    Text = "Press E TO ENABLE FLY";
-     
-     Icon = "rbxassetid://11696689831";
-
-     Duration = 5
-})
-
 -- Fly Script
+-- z4trox x chatgpt 
+
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
