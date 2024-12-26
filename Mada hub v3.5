@@ -1,0 +1,211 @@
+-- Mada Hub v3.4 - Design Moderne Ajusté
+local TweenService = game:GetService("TweenService")
+local NotificationLoad = loadstring(game:HttpGet('https://raw.githubusercontent.com/treeofplant/Notif/main/library.lua', true))()
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "Mada hub v3.5"
+gui.Parent = game.CoreGui
+
+-- Menu principal avec taille réduite
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 500, 0, 400) -- Taille réduite
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -200) -- Position ajustée
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = gui
+mainFrame.Visible = false
+
+local function applyCorners(instance, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = instance
+end
+applyCorners(mainFrame, 20)
+
+-- Gradient du fond
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
+})
+gradient.Rotation = 45
+gradient.Parent = mainFrame
+
+-- Barre latérale plus fine
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 120, 1, 0) -- Largeur réduite
+sidebar.Position = UDim2.new(0, 0, 0, 0)
+sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+sidebar.BorderSizePixel = 0
+sidebar.Parent = mainFrame
+applyCorners(sidebar, 20)
+
+-- Logo ajusté
+local logoFrame = Instance.new("Frame")
+logoFrame.Size = UDim2.new(1, 0, 0, 60)
+logoFrame.Position = UDim2.new(0, 0, 0, 0)
+logoFrame.BackgroundTransparency = 1
+logoFrame.Parent = sidebar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 1, 0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.Text = "MADA\nHUB"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 20
+title.Parent = logoFrame
+
+-- Zone de contenu ajustée
+local contentArea = Instance.new("Frame")
+contentArea.Size = UDim2.new(0, 370, 1, -20) -- Largeur ajustée
+contentArea.Position = UDim2.new(0, 125, 0, 10) -- Position ajustée
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = mainFrame
+
+-- Configuration des boutons
+local buttons = {
+    {text = "KOLINSKI admin", url = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua", icon = "⚡"},
+    {text = "Cmd Fe", url = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua", icon = "🎮"},
+    {text = "Honoka Executor", url = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox", icon = "🔧"},
+    {text = "Velocity Ware", url = "https://raw.githubusercontent.com/ImNotRox1/VWare/main/Universal.lua", icon = "🚀"},
+    {text = "Nameless Music", url = "https://raw.githubusercontent.com/Jfdedit3/Nameless-hub-/refs/heads/main/Nameless%20musique", icon = "🎵"},
+    {text = "Aimbot", url = "https://raw.githubusercontent.com/Jfdedit3/Aimbot-aim-assist-lock-/refs/heads/main/Aimbot-aim-assist-lock", icon = "🎯"},
+    {text = "Fps Script", url = "https://raw.githubusercontent.com/Jfdedit3/Fps/refs/heads/main/fps.lua", icon = "📊"},
+    {text = "MADA Admin", url = "https://raw.githubusercontent.com/Jfdedit3/Mada-admin-/refs/heads/main/MADA%20admin.lua", icon = "👑"}
+}
+
+-- Création des boutons ajustés
+local function createModernButton(info, index)
+    local button = Instance.new("Frame")
+    button.Size = UDim2.new(0, 175, 0, 80) -- Taille réduite
+    button.Position = UDim2.new(((index-1)%2) * 0.5, 5, math.floor((index-1)/2) * 0.25, 5) -- Espacement ajusté
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    button.Parent = contentArea
+    applyCorners(button, 12)
+    
+    local buttonGradient = Instance.new("UIGradient")
+    buttonGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 65)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 50))
+    })
+    buttonGradient.Rotation = 45
+    buttonGradient.Parent = button
+    
+    -- Icône ajustée
+    local icon = Instance.new("TextLabel")
+    icon.Size = UDim2.new(0, 30, 0, 30)
+    icon.Position = UDim2.new(0, 10, 0, 5)
+    icon.BackgroundTransparency = 1
+    icon.Text = info.icon
+    icon.TextSize = 25
+    icon.Font = Enum.Font.GothamBold
+    icon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    icon.Parent = button
+    
+    -- Texte ajusté
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, -20, 0, 20)
+    text.Position = UDim2.new(0, 10, 0, 45)
+    text.BackgroundTransparency = 1
+    text.Text = info.text
+    text.TextSize = 12
+    text.Font = Enum.Font.GothamSemibold
+    text.TextColor3 = Color3.fromRGB(255, 255, 255)
+    text.TextXAlignment = Enum.TextXAlignment.Left
+    text.Parent = button
+    
+    local clickArea = Instance.new("TextButton")
+    clickArea.Size = UDim2.new(1, 0, 1, 0)
+    clickArea.BackgroundTransparency = 1
+    clickArea.Text = ""
+    clickArea.Parent = button
+    
+    -- Animations
+    clickArea.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.3), {
+            BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        }):Play()
+    end)
+    
+    clickArea.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.3), {
+            BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        }):Play()
+    end)
+    
+    clickArea.MouseButton1Click:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.1), {
+            Size = UDim2.new(0, 170, 0, 75)
+        }):Play()
+        wait(0.1)
+        TweenService:Create(button, TweenInfo.new(0.1), {
+            Size = UDim2.new(0, 175, 0, 80)
+        }):Play()
+        
+        NotificationLoad:NewNotification({
+            ["Mode"] = "Custom",
+            ["Title"] = info.text,
+            ["Description"] = info.text .. " est en cours d'exécution.",
+            ["Timeout"] = 3
+        })
+        loadstring(game:HttpGet(info.url, true))()
+    end)
+end
+
+-- Créer les boutons
+for i, buttonInfo in ipairs(buttons) do
+    createModernButton(buttonInfo, i)
+end
+
+-- Bouton de fermeture ajusté
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -40, 0, 10)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeButton.Text = "×"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextSize = 25
+closeButton.Font = Enum.Font.GothamBold
+closeButton.Parent = mainFrame
+applyCorners(closeButton, 15)
+
+-- Animation de fermeture
+closeButton.MouseButton1Click:Connect(function()
+    local fadeOut = TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1
+    })
+    
+    local shrink = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    })
+    
+    fadeOut:Play()
+    shrink:Play()
+    
+    wait(0.5)
+    gui:Destroy()
+end)
+
+-- Animation d'ouverture ajustée
+local function showIntroAnimation()
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.BackgroundTransparency = 1
+    mainFrame.Visible = true
+    
+    local grow = TweenService:Create(mainFrame, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 500, 0, 400),
+        Position = UDim2.new(0.5, -250, 0.5, -200)
+    })
+    
+    local fadeIn = TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+        BackgroundTransparency = 0
+    })
+    
+    grow:Play()
+    fadeIn:Play()
+end
+
+showIntroAnimation()
