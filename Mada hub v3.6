@@ -282,7 +282,7 @@ for i, config in ipairs(scriptConfigs) do
             
             game:GetService("Debris"):AddItem(notification, 0.5)
         else
-            config.callback()
+            config.callback()  -- Cette ligne semble correcte
         end
     end)
 end
