@@ -4,7 +4,7 @@
 -- Instances:
 game:GetService("StarterGui"):SetCore("SendNotification",{ 	Title = "Rc7",  	
 
-Text = "Made By Team Fat, Moon, And Harkinian",
+Text = "Made By Team z4trox",
 
 })
 
