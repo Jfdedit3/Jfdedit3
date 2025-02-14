@@ -10,11 +10,10 @@ Text = "Made By Team z4trox",
 
 game:GetService("StarterGui"):SetCore("SendNotification",{ 	
 
-Title = "Wait...",  	
+Title = "Loading...",  	
 
-Text = "Loading...",
+Text = "Password is teamfatxd",
 
-Description = "Password is teamfatxd"
 })
 
 wait(3)
