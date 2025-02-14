@@ -14,6 +14,7 @@ Title = "Wait...",
 
 Text = "Loading...",
 
+Description = "Password is teamfatxd"
 })
 
 wait(3)
