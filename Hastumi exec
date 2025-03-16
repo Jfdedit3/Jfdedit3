@@ -5,13 +5,13 @@ local CoreGui = game:GetService("CoreGui")
 -- Constants
 local COLORS = {
     PRIMARY = Color3.fromRGB(0, 230, 255),     -- Neon cyan
-    SECONDARY = Color3.fromRGB(170, 0, 255),   -- Neon purple
-    BACKGROUND = Color3.fromRGB(8, 10, 15),    -- Deep dark
-    DARKER = Color3.fromRGB(12, 15, 22),       -- Darker shade
-    TEXT = Color3.fromRGB(255, 255, 255),      -- White text
-    ACCENT = Color3.fromRGB(0, 255, 157),      -- Neon green
-    WARNING = Color3.fromRGB(255, 0, 98),      -- Neon pink
-    GLOW = Color3.fromRGB(0, 230, 255)         -- Glow color
+    SECONDARY = Color3.fromRGB(170, 0, 255),     -- Neon purple
+    BACKGROUND = Color3.fromRGB(8, 10, 15),        -- Deep dark
+    DARKER = Color3.fromRGB(12, 15, 22),           -- Darker shade
+    TEXT = Color3.fromRGB(255, 255, 255),          -- White text
+    ACCENT = Color3.fromRGB(0, 255, 157),          -- Neon green
+    WARNING = Color3.fromRGB(255, 0, 98),          -- Neon pink
+    GLOW = Color3.fromRGB(0, 230, 255)             -- Glow color
 }
 
 local TWEEN_INFO = {
@@ -20,49 +20,81 @@ local TWEEN_INFO = {
     BOUNCE = TweenInfo.new(0.4, Enum.EasingStyle.Bounce)
 }
 
+-- Utilitaire pour tween des propriétés
+local function tweenProperty(instance, properties, tweenInfo)
+    tweenInfo = tweenInfo or TWEEN_INFO.SHORT
+    local tweenObj = TweenService:Create(instance, tweenInfo, properties)
+    tweenObj:Play()
+end
+
+-- Fonctions de création d’effets UI
+local function CreateGlow(parent, intensity)
+    intensity = intensity or 0.85
+    local glow = Instance.new("ImageLabel")
+    glow.BackgroundTransparency = 1
+    glow.Image = "rbxassetid://131317109"
+    glow.ImageColor3 = COLORS.GLOW
+    glow.ImageTransparency = intensity
+    glow.Size = UDim2.new(1.5, 0, 1.5, 0)
+    glow.Position = UDim2.new(-0.25, 0, -0.25, 0)
+    glow.ZIndex = parent.ZIndex - 1
+    glow.Parent = parent
+    return glow
+end
+
+local function CreateCyberCorner(parent, size)
+    size = size or 8
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, size)
+    corner.Parent = parent
+    return corner
+end
+
+local function CreateNeonStroke(parent, thickness)
+    thickness = thickness or 2
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = COLORS.PRIMARY
+    stroke.Thickness = thickness
+    stroke.Parent = parent
+    return stroke
+end
+
+-- Fonction pour changer d'avatar (inchangée)
+local function fireAvatarChange(id, notificationTitle)
+    local argsTable = type(id) == "table" and id or {1, 1, 1, 1, 1, id}
+    local args = {
+        [1] = "CharacterChange",
+        [2] = argsTable,
+        [3] = "z4troxhub"
+    }
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local starterGui = game:GetService("StarterGui")
+    local remote = replicatedStorage.RE and replicatedStorage.RE:FindFirstChild("1Avata1rOrigina1l")
+    if remote then
+        remote:FireServer(unpack(args))
+        starterGui:SetCore("SendNotification", {
+            Title = notificationTitle,
+            Text = "Wait Please 1-10 Seconds",
+            Duration = 5
+        })
+    end
+end
+
 local function CreateInterface()
+    -- Création du ScreenGui principal
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "Hastumi_Exec"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = CoreGui
 
-    -- Create futuristic glow effect
-    local function CreateGlow(parent, intensity)
-        local glow = Instance.new("ImageLabel")
-        glow.BackgroundTransparency = 1
-        glow.Image = "rbxassetid://131317109"
-        glow.ImageColor3 = COLORS.GLOW
-        glow.ImageTransparency = intensity or 0.85
-        glow.Size = UDim2.new(1.5, 0, 1.5, 0)
-        glow.Position = UDim2.new(-0.25, 0, -0.25, 0)
-        glow.ZIndex = parent.ZIndex - 1
-        glow.Parent = parent
-        return glow
-    end
-
-    -- Create cyber corner effect
-    local function CreateCyberCorner(parent, size)
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, size or 8)
-        corner.Parent = parent
-        return corner
-    end
-
-    -- Create neon stroke effect
-    local function CreateNeonStroke(parent, thickness)
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = COLORS.PRIMARY
-        stroke.Thickness = thickness or 2
-        stroke.Parent = parent
-        return stroke
-    end
-
-    -- Main Frame
+    -- Main Frame centrée
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0.75, 0, 0.7, 0)
-    MainFrame.Position = UDim2.new(0.125, 0, 1.1, 0)
+    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    -- Position cachée en dehors de l'écran (en bas)
+    MainFrame.Position = UDim2.new(0.5, 0, 1.5, 0)
     MainFrame.BackgroundColor3 = COLORS.BACKGROUND
     MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
@@ -71,7 +103,7 @@ local function CreateInterface()
     CreateNeonStroke(MainFrame)
     CreateGlow(MainFrame)
 
-    -- Create background pattern
+    -- Pattern de fond
     local Pattern = Instance.new("ImageLabel")
     Pattern.Size = UDim2.new(1, 0, 1, 0)
     Pattern.BackgroundTransparency = 1
@@ -80,9 +112,9 @@ local function CreateInterface()
     Pattern.ImageTransparency = 0.95
     Pattern.Parent = MainFrame
 
-    -- Content ScrollingFrame
+    -- Cadre pour le code (ScrollingFrame)
     local ScrollingContent = Instance.new("ScrollingFrame")
-    ScrollingContent.Size = UDim2.new(0.7, -20, 0.95, 0)
+    ScrollingContent.Size = UDim2.new(0.68, -20, 0.95, 0)
     ScrollingContent.Position = UDim2.new(0, 10, 0.025, 0)
     ScrollingContent.BackgroundColor3 = COLORS.DARKER
     ScrollingContent.BorderSizePixel = 0
@@ -93,7 +125,7 @@ local function CreateInterface()
     CreateCyberCorner(ScrollingContent)
     CreateNeonStroke(ScrollingContent, 1)
 
-    -- Code Editor
+    -- Éditeur de code
     local Editor = Instance.new("TextBox")
     Editor.Size = UDim2.new(1, -16, 1, 0)
     Editor.Position = UDim2.new(0, 8, 0, 0)
@@ -108,19 +140,35 @@ local function CreateInterface()
     Editor.TextXAlignment = Enum.TextXAlignment.Left
     Editor.TextYAlignment = Enum.TextYAlignment.Top
     Editor.TextWrapped = true
-    Editor.Text = ""  -- Désactive tout texte par défaut
+    Editor.Text = ""
     Editor.Parent = ScrollingContent
 
-    -- Auto-adjust ScrollingFrame
     Editor:GetPropertyChangedSignal("TextBounds"):Connect(function()
         ScrollingContent.CanvasSize = UDim2.new(0, 0, 0, Editor.TextBounds.Y + 20)
     end)
 
-    -- Create Cyber Button
-    local function CreateCyberButton(text, position, color, callback)
+    -- Conteneur pour les boutons d'action
+    local ActionButtonsFrame = Instance.new("Frame")
+    ActionButtonsFrame.Name = "ActionButtonsFrame"
+    ActionButtonsFrame.BackgroundTransparency = 1
+    ActionButtonsFrame.Size = UDim2.new(0.25, -10, 0.9, 0)
+    ActionButtonsFrame.Position = UDim2.new(0.73, 0, 0.05, 0)
+    ActionButtonsFrame.Parent = MainFrame
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Parent = ActionButtonsFrame
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 10)
+
+    local listPadding = Instance.new("UIPadding")
+    listPadding.PaddingLeft = UDim.new(0, 5)
+    listPadding.PaddingRight = UDim.new(0, 5)
+    listPadding.Parent = ActionButtonsFrame
+
+    -- Fonction modifiée de création de bouton (prend en paramètre le parent)
+    local function CreateCyberButton(text, parent, callback, color)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(0.25, -10, 0.12, 0)
-        button.Position = position
+        button.Size = UDim2.new(1, 0, 0, 40)
         button.BackgroundColor3 = color or COLORS.PRIMARY
         button.BackgroundTransparency = 0.9
         button.Text = text
@@ -128,42 +176,26 @@ local function CreateInterface()
         button.Font = Enum.Font.GothamBold
         button.TextSize = 14
         button.AutoButtonColor = false
-        button.Parent = MainFrame
+        button.Parent = parent
 
         local buttonStroke = CreateNeonStroke(button, 1)
         buttonStroke.Color = color or COLORS.PRIMARY
         CreateCyberCorner(button, 6)
         
-        -- Hover Effects
         local glowEffect = CreateGlow(button, 0.9)
         
         button.MouseEnter:Connect(function()
-            TweenService:Create(button, TWEEN_INFO.SHORT, {
-                BackgroundTransparency = 0.7,
-                TextSize = 15
-            }):Play()
-            TweenService:Create(buttonStroke, TWEEN_INFO.SHORT, {
-                Thickness = 2
-            }):Play()
-            TweenService:Create(glowEffect, TWEEN_INFO.SHORT, {
-                ImageTransparency = 0.7
-            }):Play()
+            tweenProperty(button, {BackgroundTransparency = 0.7, TextSize = 15})
+            tweenProperty(buttonStroke, {Thickness = 2})
+            tweenProperty(glowEffect, {ImageTransparency = 0.7})
         end)
 
         button.MouseLeave:Connect(function()
-            TweenService:Create(button, TWEEN_INFO.SHORT, {
-                BackgroundTransparency = 0.9,
-                TextSize = 14
-            }):Play()
-            TweenService:Create(buttonStroke, TWEEN_INFO.SHORT, {
-                Thickness = 1
-            }):Play()
-            TweenService:Create(glowEffect, TWEEN_INFO.SHORT, {
-                ImageTransparency = 0.9
-            }):Play()
+            tweenProperty(button, {BackgroundTransparency = 0.9, TextSize = 14})
+            tweenProperty(buttonStroke, {Thickness = 1})
+            tweenProperty(glowEffect, {ImageTransparency = 0.9})
         end)
 
-        -- Button Click Event
         button.MouseButton1Click:Connect(function()
             if callback then callback() end
         end)
@@ -171,52 +203,59 @@ local function CreateInterface()
         return button
     end
 
-    -- Action Buttons with Functions
+    -- Fonctions d'action
     local function executeScript()
-        -- Logic for executing the script
         print("Executing script...")
-        -- Execute the script logic here, for example:
-        loadstring(Editor.Text)()
+        local success, err = pcall(function()
+            loadstring(Editor.Text)()
+        end)
+        if not success then
+            warn("Script error: " .. err)
+        end
     end
 
     local function copyScript()
-        -- Logic to copy the script to clipboard
-        setclipboard(Editor.Text)
-        print("Script copied to clipboard!")
+        if setclipboard then
+            setclipboard(Editor.Text)
+            print("Script copied to clipboard!")
+        else
+            warn("setclipboard is not available.")
+        end
     end
 
     local function clearScript()
-        -- Clear the script editor
         Editor.Text = ""
         print("Editor cleared!")
     end
 
     local function pasteScript()
-        -- Logic to paste script from clipboard
-        local clipboardText = getclipboard()
-        Editor.Text = clipboardText
-        print("Script pasted from clipboard!")
+        if getclipboard then
+            local clipboardText = getclipboard()
+            Editor.Text = clipboardText
+            print("Script pasted from clipboard!")
+        else
+            warn("getclipboard is not available.")
+        end
     end
 
-    -- Create action buttons
-    local executeButton = CreateCyberButton("EXECUTE", UDim2.new(0.73, 0, 0.05, 0), COLORS.ACCENT, executeScript)
-    local copyButton = CreateCyberButton("COPY", UDim2.new(0.73, 0, 0.2, 0), nil, copyScript)
-    local clearButton = CreateCyberButton("CLEAR", UDim2.new(0.73, 0, 0.35, 0), nil, clearScript)
-    local pasteButton = CreateCyberButton("PASTE", UDim2.new(0.73, 0, 0.5, 0), nil, pasteScript)
+    -- Création des boutons d'action dans le conteneur
+    local executeButton = CreateCyberButton("EXECUTE", ActionButtonsFrame, executeScript, COLORS.ACCENT)
+    local copyButton = CreateCyberButton("COPY", ActionButtonsFrame, copyScript)
+    local clearButton = CreateCyberButton("CLEAR", ActionButtonsFrame, clearScript)
+    local pasteButton = CreateCyberButton("PASTE", ActionButtonsFrame, pasteScript)
 
-    -- Toggle Button
+    -- Bouton Toggle pour afficher/masquer l'interface
     local ToggleButton = Instance.new("ImageButton")
-    ToggleButton.Size = UDim2.new(0, 30, 0, 30)  -- Small size for Toggle Button
-    ToggleButton.Position = UDim2.new(0.5, -15, 0, 10)  -- Positioned at the top center
+    ToggleButton.Size = UDim2.new(0, 30, 0, 30)
+    ToggleButton.Position = UDim2.new(0.5, -15, 0, 10)
     ToggleButton.BackgroundColor3 = COLORS.BACKGROUND
     ToggleButton.AutoButtonColor = false
     ToggleButton.Parent = ScreenGui
 
-    CreateCyberCorner(ToggleButton, UDim.new(0.5, 0))
+    CreateCyberCorner(ToggleButton, 15)
     local toggleStroke = CreateNeonStroke(ToggleButton)
     CreateGlow(ToggleButton)
 
-    -- Arrow Icon
     local Arrow = Instance.new("ImageLabel")
     Arrow.Size = UDim2.new(0.6, 0, 0.6, 0)
     Arrow.Position = UDim2.new(0.2, 0, 0.2, 0)
@@ -225,32 +264,18 @@ local function CreateInterface()
     Arrow.ImageColor3 = COLORS.PRIMARY
     Arrow.Parent = ToggleButton
 
-    -- Interface State
     local isVisible = false
-
     local function ToggleInterface()
         isVisible = not isVisible
-        
-        local targetPos = isVisible and 
-            UDim2.new(0.125, 0, 0.15, 0) or 
-            UDim2.new(0.125, 0, 1.1, 0)
-
-        -- Animate MainFrame with smooth effect
-        TweenService:Create(MainFrame, TWEEN_INFO.LONG, {
-            Position = targetPos
-        }):Play()
-
-        -- Animate Arrow with smooth bounce effect
-        TweenService:Create(Arrow, TWEEN_INFO.BOUNCE, {
-            Rotation = isVisible and 180 or 0
-        }):Play()
+        local targetPos = isVisible and UDim2.new(0.5, 0, 0.5, 0) or UDim2.new(0.5, 0, 1.5, 0)
+        tweenProperty(MainFrame, {Position = targetPos}, TWEEN_INFO.LONG)
+        tweenProperty(Arrow, {Rotation = isVisible and 180 or 0}, TWEEN_INFO.BOUNCE)
     end
 
-    -- Connect ToggleButton to the toggle function
     ToggleButton.MouseButton1Click:Connect(ToggleInterface)
-
+    
     return ScreenGui
 end
 
--- Create the interface
+-- Création de l'interface
 CreateInterface()
