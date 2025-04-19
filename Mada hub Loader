@@ -1,195 +1,89 @@
--- Services
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
+-- Get the player and their PlayerGui
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Couleurs
-local NEON_COLOR = Color3.fromRGB(0, 225, 255)
-local DARK_COLOR = Color3.fromRGB(15, 15, 25)
+-- Create the ScreenGui "MadaHubLoader"
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MadaHubLoader"
+screenGui.Parent = playerGui
 
--- Effet néon pour bordures
-local function applyNeonStroke(instance)
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = NEON_COLOR
-    stroke.Thickness = 2
-    stroke.Parent = instance
-    coroutine.wrap(function()
-        while instance.Parent do
-            TweenService:Create(stroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1), {Transparency = 0.7}):Play()
-            task.wait(1.5)
-            TweenService:Create(stroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1), {Transparency = 0}):Play()
-            task.wait(1.5)
-        end
-    end)()
+-- Create the main frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Parent = screenGui
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Position = UDim2.new(0.5, -180, 0.5, -220)
+mainFrame.Size = UDim2.new(0, 360, 0, 440)
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- Add a title to the interface
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Parent = mainFrame
+title.BackgroundTransparency = 1
+title.Position = UDim2.new(0, 0, 0, 10)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "MADA HUB"
+title.TextColor3 = Color3.fromRGB(0, 225, 255)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+local underline = Instance.new("Frame")
+underline.Parent = mainFrame
+underline.Position = UDim2.new(0.5, -100, 0, 65)
+underline.Size = UDim2.new(0, 200, 0, 2)
+underline.BackgroundColor3 = Color3.fromRGB(0, 225, 255)
+
+-- List of scripts to load
+local scripts = {
+    { name = "⚡ KOLINSKI admin FE",    url = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua" },
+    { name = "👑 Nameless Admin",      url = "https://raw.githubusercontent.com/toyahfur/Nameless-Admin-2.0/main/unfinished-source-code" },
+    { name = "🖥️ CMD FE",              url = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua" },
+    { name = "🎵 Nameless music",      url = "https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main" },
+    { name = "🔧 Honoka Executor",     url = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox" },
+    { name = "💀 z4trox Hub v1",       url = "https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/refs/heads/main/z4trox%20hub" }
+}
+
+-- Generic function to create a button
+local function createButton(name, text, position)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Parent = mainFrame
+    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    button.BorderSizePixel = 0
+    button.Position = position
+    button.Size = UDim2.new(0, 300, 0, 45)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.Gotham
+    button.TextScaled = true
+    button.AutoButtonColor = false
+
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    end)
+    return button
 end
 
--- Particules holographiques
-local function createHolographicEffect(parent)
-    for i = 1, 15 do
-        local p = Instance.new("Frame")
-        p.Size = UDim2.new(0, math.random(2,4), 0, math.random(3,5))
-        p.BackgroundColor3 = NEON_COLOR
-        p.BackgroundTransparency = 0.8
-        p.BorderSizePixel = 0
-        p.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        p.Parent = parent
-        coroutine.wrap(function()
-            while parent.Parent do
-                TweenService:Create(p, TweenInfo.new(math.random(2,4)), {
-                    Position = UDim2.new(math.random(),0, math.random(),0),
-                    BackgroundTransparency = math.random(0.7,0.9)
-                }):Play()
-                task.wait(math.random(2,4))
+-- Dynamically create buttons based on the 'scripts' table
+for i, cfg in ipairs(scripts) do
+    local yOffset = 80 + (i - 1) * 55
+    local btn = createButton("Btn"..i, cfg.name, UDim2.new(0.5, -150, 0, yOffset))
+    btn.MouseButton1Click:Connect(function()
+        btn.Text = "Loading..."
+        spawn(function()
+            local ok, err = pcall(function()
+                loadstring(game:HttpGet(cfg.url))()
+            end)
+            if not ok then
+                warn("Error loading "..cfg.name..": "..err)
             end
-        end)()
-    end
-end
-
--- Création de l'UI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MadaHubV3"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.Parent = CoreGui
-
-local RootFrame = Instance.new("Frame")
-RootFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-RootFrame.Position = UDim2.new(0.5,0,0.5,0)
-RootFrame.Size = UDim2.new(0,0,0,0)
-RootFrame.BackgroundColor3 = DARK_COLOR
-RootFrame.ClipsDescendants = true
-RootFrame.Parent = ScreenGui
-
-applyNeonStroke(RootFrame)
-createHolographicEffect(RootFrame)
-
-TweenService:Create(RootFrame, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0.1, 200, 0.1, 125)
-}):Play()
-
-local DropShadow = Instance.new("ImageLabel")
-DropShadow.Name = "DropShadow"
-DropShadow.Parent = RootFrame
-DropShadow.AnchorPoint = Vector2.new(0.5,0.5)
-DropShadow.Position = UDim2.new(0.5,0,0.5,0)
-DropShadow.Size = UDim2.new(1,47,1,47)
-DropShadow.ZIndex = -1
-DropShadow.Image = "rbxassetid://6014261993"
-DropShadow.ImageColor3 = Color3.new(0,0,0)
-DropShadow.ImageTransparency = 0.5
-DropShadow.ScaleType = Enum.ScaleType.Slice
-DropShadow.SliceCenter = Rect.new(49,49,450,450)
-
--- Titres
-local MainTitle = Instance.new("TextLabel")
-MainTitle.Name = "MainTitle"
-MainTitle.Parent = RootFrame
-MainTitle.AnchorPoint = Vector2.new(0.5,0)
-MainTitle.Position = UDim2.new(0.5,0,0.05,0)
-MainTitle.Size = UDim2.new(0.9,0,0.2,0)
-MainTitle.BackgroundTransparency = 1
-MainTitle.Font = Enum.Font.GothamBold
-MainTitle.Text = "MADA HUB"
-MainTitle.TextColor3 = NEON_COLOR
-MainTitle.TextScaled = true
-applyNeonStroke(MainTitle)
-
-local SubTitle = Instance.new("TextLabel")
-SubTitle.Name = "SubTitle"
-SubTitle.Parent = RootFrame
-SubTitle.AnchorPoint = Vector2.new(0.5,0)
-SubTitle.Position = UDim2.new(0.5,0,0.25,0)
-SubTitle.Size = UDim2.new(0.9,0,0.12,0)
-SubTitle.BackgroundTransparency = 1
-SubTitle.Font = Enum.Font.RobotoMono
-SubTitle.Text = "<== | ==>"
-SubTitle.TextColor3 = NEON_COLOR
-SubTitle.TextTransparency = 0.3
-SubTitle.TextScaled = true
-applyNeonStroke(SubTitle)
-
-local ButtonLog = Instance.new("Frame")
-ButtonLog.Name = "ButtonLog"
-ButtonLog.Parent = RootFrame
-ButtonLog.AnchorPoint = Vector2.new(0.5,0)
-ButtonLog.Position = UDim2.new(0.5,0,0.46,0)
-ButtonLog.Size = UDim2.new(0.9,0,0.5,0)
-ButtonLog.BackgroundTransparency = 1
-
-local UIList = Instance.new("UIListLayout")
-UIList.Parent = ButtonLog
-UIList.FillDirection = Enum.FillDirection.Horizontal
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIList.Padding = UDim.new(0,10)
-
-local function createButton(name, text)
-    local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Parent = ButtonLog
-    btn.Size = UDim2.new(0.44,0,0.42,0)
-    btn.BackgroundColor3 = Color3.new(1,1,1)
-    btn.BackgroundTransparency = 0.95
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = text
-    btn.TextScaled = true
-    btn.TextColor3 = NEON_COLOR
-    applyNeonStroke(btn)
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.3), {Size = UDim2.new(0.474,0,0.454,0)}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.3), {Size = UDim2.new(0.44,0,0.42,0)}):Play()
-    end)
-    return btn
-end
-
-local BtnOld = createButton("Old","NEW VERSION")
-local BtnNew = createButton("New","OLD VERSION")
-
-local Hidden = Instance.new("Frame")
-Hidden.Name = "Hidden"
-Hidden.Parent = RootFrame
-Hidden.AnchorPoint = Vector2.new(0.5,0.5)
-Hidden.Position = UDim2.new(0.5,0,1.5,0)
-Hidden.Size = UDim2.new(1,0,1,0)
-Hidden.BackgroundColor3 = Color3.new(0,0,0)
-Hidden.BackgroundTransparency = 0
-
-local HiddenTitle = Instance.new("TextLabel")
-HiddenTitle.Name = "HiddenTitle"
-HiddenTitle.Parent = Hidden
-HiddenTitle.AnchorPoint = Vector2.new(0.5,0.5)
-HiddenTitle.Position = UDim2.new(0.5,0,0.5,0)
-HiddenTitle.Size = UDim2.new(0.9,0,0.2,0)
-HiddenTitle.BackgroundTransparency = 1
-HiddenTitle.Font = Enum.Font.RobotoMono
-HiddenTitle.Text = "Loading..."
-HiddenTitle.TextScaled = true
-HiddenTitle.TextColor3 = NEON_COLOR
-applyNeonStroke(HiddenTitle)
-
-local function startEffect()
-    TweenService:Create(RootFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = UDim2.new(0.1,190,0.1,115)}):Play()
-    TweenService:Create(Hidden, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Position = UDim2.new(0.5,0,0.5,0)}):Play()
-    task.delay(1, function()
-        local tween = TweenService:Create(RootFrame, TweenInfo.new(1, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size=UDim2.new(0,0,0,0)})
-        tween:Play()
-        tween.Completed:Wait()
-        ScreenGui:Destroy()
+            btn.Text = cfg.name
+        end)
     end)
 end
-
-BtnOld.MouseButton1Click:Connect(function()
-    startEffect()
-    pcall(function()
-        task.wait(3)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Mada-hub-upd/refs/heads/main/3"))()
-    end)
-end)
-
-BtnNew.MouseButton1Click:Connect(function()
-    startEffect()
-    pcall(function()
-        task.wait(3)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Mada-hub-upd/main/oldver"))()
-    end)
-end)
