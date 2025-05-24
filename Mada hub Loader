@@ -1,89 +1,242 @@
--- Get the player and their PlayerGui
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- Charger la bibliothèque de notifications
+local NotificationLoad = loadstring(game:HttpGet(('https://raw.githubusercontent.com/treeofplant/Notif/main/library.lua'), true))()
 
--- Create the ScreenGui "MadaHubLoader"
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MadaHubLoader"
-screenGui.Parent = playerGui
+-- Créer une notification
+NotificationLoad:NewNotification({
+    Mode = "Custom",
+    Title = "HELLO!",
+    Description = "Welcome to Mada hub",
+    Notification_Image = "rbxassetid://",
+    Notification_Sound = "",
+    Timeout = 5,
+    Audio = false
+})
 
--- Create the main frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Parent = screenGui
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.BorderSizePixel = 0
-mainFrame.Position = UDim2.new(0.5, -180, 0.5, -220)
-mainFrame.Size = UDim2.new(0, 360, 0, 440)
-mainFrame.Active = true
-mainFrame.Draggable = true
+wait(5.3)
 
--- Add a title to the interface
-local title = Instance.new("TextLabel")
-title.Name = "Title"
-title.Parent = mainFrame
-title.BackgroundTransparency = 1
-title.Position = UDim2.new(0, 0, 0, 10)
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "MADA HUB"
-title.TextColor3 = Color3.fromRGB(0, 225, 255)
-title.Font = Enum.Font.GothamBold
-title.TextScaled = true
+-- Créer un ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MadaHubGui"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false
 
-local underline = Instance.new("Frame")
-underline.Parent = mainFrame
-underline.Position = UDim2.new(0.5, -100, 0, 65)
-underline.Size = UDim2.new(0, 200, 0, 2)
-underline.BackgroundColor3 = Color3.fromRGB(0, 225, 255)
+-- Créer un son
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://5525281334"
+sound.Looped = false
+sound.Parent = workspace
+sound:Play()
 
--- List of scripts to load
-local scripts = {
-    { name = "⚡ KOLINSKI admin FE",    url = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua" },
-    { name = "👑 Nameless Admin",      url = "https://raw.githubusercontent.com/toyahfur/Nameless-Admin-2.0/main/unfinished-source-code" },
-    { name = "🖥️ CMD FE",              url = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua" },
-    { name = "🎵 Nameless music",      url = "https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main" },
-    { name = "🔧 Honoka Executor",     url = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox" },
-    { name = "💀 z4trox Hub v1",       url = "https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/refs/heads/main/z4trox%20hub" }
+-- Créer le cadre principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.5, -180, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 360, 0, 250)
+MainFrame.BackgroundTransparency = 1 -- Début transparent pour l'animation
+local MainFrameCorner = Instance.new("UICorner")
+MainFrameCorner.CornerRadius = UDim.new(0, 8)
+MainFrameCorner.Parent = MainFrame
+
+-- Créer le titre
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "Mada Hub"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 16
+TitleLabel.BackgroundTransparency = 1 -- Début transparent pour l'animation
+TitleLabel.TextTransparency = 1
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = TitleLabel
+
+-- Créer le label Discord
+local DiscordLabel = Instance.new("TextLabel")
+DiscordLabel.Name = "DiscordLabel"
+DiscordLabel.Parent = MainFrame
+DiscordLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+DiscordLabel.Size = UDim2.new(1, 0, 0, 30)
+DiscordLabel.Position = UDim2.new(0, 0, 1, -30)
+DiscordLabel.Font = Enum.Font.SourceSans
+DiscordLabel.Text = "discord.gg/a8DhGKRNEq"
+DiscordLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordLabel.TextSize = 16
+DiscordLabel.BackgroundTransparency = 1 -- Début transparent pour l'animation
+DiscordLabel.TextTransparency = 1
+local DiscordCorner = Instance.new("UICorner")
+DiscordCorner.CornerRadius = UDim.new(0, 8)
+DiscordCorner.Parent = DiscordLabel
+
+-- Créer un conteneur pour les onglets
+local TabContainer = Instance.new("Frame")
+TabContainer.Name = "TabContainer"
+TabContainer.Parent = MainFrame
+TabContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TabContainer.Position = UDim2.new(0, 0, 0, 30)
+TabContainer.Size = UDim2.new(0, 100, 1, -60)
+TabContainer.BackgroundTransparency = 1 -- Début transparent pour l'animation
+local TabContainerCorner = Instance.new("UICorner")
+TabContainerCorner.CornerRadius = UDim.new(0, 8)
+TabContainerCorner.Parent = TabContainer
+
+-- Ajouter un UIListLayout pour les onglets
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.Parent = TabContainer
+TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabListLayout.Padding = UDim.new(0, 5)
+TabListLayout.FillDirection = Enum.FillDirection.Vertical
+
+-- Créer l'onglet Mada
+local MadaTab = Instance.new("TextButton")
+MadaTab.Name = "MadaTab"
+MadaTab.Parent = TabContainer
+MadaTab.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+MadaTab.Size = UDim2.new(1, 0, 0, 30)
+MadaTab.Position = UDim2.new(0, 0, 0, 0)
+MadaTab.Font = Enum.Font.SourceSansBold
+MadaTab.Text = "🏠 Home"
+MadaTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+MadaTab.TextSize = 16
+MadaTab.BackgroundTransparency = 1 -- Début transparent pour l'animation
+MadaTab.TextTransparency = 1
+local MadaTabCorner = Instance.new("UICorner")
+MadaTabCorner.CornerRadius = UDim.new(0, 8)
+MadaTabCorner.Parent = MadaTab
+
+-- Créer le bouton de fermeture
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.Position = UDim2.new(1, -25, 0, 5)
+CloseButton.Size = UDim2.new(0, 20, 0, 20)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 16
+CloseButton.BackgroundTransparency = 1 -- Début transparent pour l'animation
+CloseButton.TextTransparency = 1
+local CloseButtonCorner = Instance.new("UICorner")
+CloseButtonCorner.CornerRadius = UDim.new(0, 8)
+CloseButtonCorner.Parent = CloseButton
+CloseButton.Activated:Connect(function()
+    ScreenGui.Enabled = false
+end)
+
+-- Liste des boutons
+local buttons = {
+    {Name = "KolinskiButton", Text = "⚡ KOLINSKI admin FE", Script = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua", Position = UDim2.new(0, 130, 0, 70)},
+    {Name = "Z4troxHubButton", Text = "💀 z4trox Hub v1", Script = "https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/main/z4trox%20hub", Position = UDim2.new(0, 240, 0, 70)},
+    {Name = "NamelessAdminButton", Text = "👑 Nameless Admin", Script = "https://raw.githubusercontent.com/toyahfur/Nameless-Admin-2.0/main/unfinished-source-code", Position = UDim2.new(0, 120, 0, 105)},
+    {Name = "CMDFeButton", Text = "🖥️ CMD FE", Script = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua", Position = UDim2.new(0, 230, 0, 105)},
+    {Name = "NamelessMusicButton", Text = "🎵 Nameless music", Script = "https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main", Position = UDim2.new(0, 110, 0, 140)},
+    {Name = "HonokaExecutorButton", Text = "🔧 Honoka Executor", Script = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox", Position = UDim2.new(0, 220, 0, 140)}
 }
 
--- Generic function to create a button
-local function createButton(name, text, position)
+-- Créer les boutons de script
+for _, btnData in ipairs(buttons) do
     local button = Instance.new("TextButton")
-    button.Name = name
-    button.Parent = mainFrame
+    button.Name = btnData.Name
+    button.Parent = MainFrame
     button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    button.BorderSizePixel = 0
-    button.Position = position
-    button.Size = UDim2.new(0, 300, 0, 45)
-    button.Text = text
+    button.Position = btnData.Position
+    button.Size = UDim2.new(0, 90, 0, 25)
+    button.Font = Enum.Font.SourceSans
+    button.Text = btnData.Text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.Gotham
-    button.TextScaled = true
-    button.AutoButtonColor = false
-
+    button.TextSize = 14
+    button.BackgroundTransparency = 1 -- Début transparent pour l'animation
+    button.TextTransparency = 1
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+    button.MouseButton1Click:Connect(function()
+        button.Text = "Loading..."
+        spawn(function()
+            local ok, err = pcall(function()
+                loadstring(game:HttpGet(btnData.Script, true))()
+            end)
+            if not ok then
+                warn("Error loading "..btnData.Text..": "..err)
+            end
+            button.Text = btnData.Text
+        end)
+    end)
     button.MouseEnter:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     end)
     button.MouseLeave:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end)
-    return button
 end
 
--- Dynamically create buttons based on the 'scripts' table
-for i, cfg in ipairs(scripts) do
-    local yOffset = 80 + (i - 1) * 55
-    local btn = createButton("Btn"..i, cfg.name, UDim2.new(0.5, -150, 0, yOffset))
-    btn.MouseButton1Click:Connect(function()
-        btn.Text = "Loading..."
-        spawn(function()
-            local ok, err = pcall(function()
-                loadstring(game:HttpGet(cfg.url))()
-            end)
-            if not ok then
-                warn("Error loading "..cfg.name..": "..err)
-            end
-            btn.Text = cfg.name
-        end)
-    end)
+-- Créer le bouton de bascule de visibilité
+local ToggleVisibilityButton = Instance.new("TextButton")
+ToggleVisibilityButton.Name = "ToggleVisibilityButton"
+ToggleVisibilityButton.Parent = ScreenGui
+ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ToggleVisibilityButton.BorderColor3 = Color3.fromRGB(0, 0, 255)
+ToggleVisibilityButton.Position = UDim2.new(0.5, -67.5, 0.35, -150)
+ToggleVisibilityButton.Size = UDim2.new(0, 135, 0, 30)
+ToggleVisibilityButton.Font = Enum.Font.SourceSansBold
+ToggleVisibilityButton.Text = "Toggle UI"
+ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleVisibilityButton.TextSize = 14
+ToggleVisibilityButton.Draggable = true
+ToggleVisibilityButton.BackgroundTransparency = 1 -- Début transparent pour l'animation
+ToggleVisibilityButton.TextTransparency = 1
+local ToggleButtonCorner = Instance.new("UICorner")
+ToggleButtonCorner.CornerRadius = UDim.new(0, 8)
+ToggleButtonCorner.Parent = ToggleVisibilityButton
+ToggleVisibilityButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- Animation d'introduction
+local TweenService = game:GetService("TweenService")
+local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+-- Animation pour MainFrame (fade-in et échelle)
+MainFrame.Size = UDim2.new(0, 360 * 0.8, 0, 250 * 0.8) -- Début plus petit
+local mainFrameTween = TweenService:Create(MainFrame, tweenInfo, {
+    BackgroundTransparency = 0,
+    Size = UDim2.new(0, 360, 0, 250),
+    Position = UDim2.new(0.5, -180, 0.5, -125)
+})
+mainFrameTween:Play()
+
+-- Animation pour les éléments enfants
+local function animateElement(element)
+    local bgTween = TweenService:Create(element, tweenInfo, { BackgroundTransparency = 0 })
+    bgTween:Play()
+    if element:IsA("TextButton") or element:IsA("TextLabel") then
+        local textTween = TweenService:Create(element, tweenInfo, { TextTransparency = 0 })
+        textTween:Play()
+    end
 end
+
+-- Animer les éléments un par un avec un léger décalage
+local delay = 0.2
+animateElement(TitleLabel)
+wait(delay)
+animateElement(DiscordLabel)
+wait(delay)
+animateElement(TabContainer)
+animateElement(MadaTab)
+wait(delay)
+for _, btnData in ipairs(buttons) do
+    local button = MainFrame:FindFirstChild(btnData.Name)
+    if button then
+        animateElement(button)
+        wait(delay)
+    end
+end
+animateElement(CloseButton)
+wait(delay)
+animateElement(ToggleVisibilityButton)
