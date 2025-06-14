@@ -22,7 +22,7 @@ local closeTweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDire
 local buttons = {
     {Name = "KolinskiButton", Text = "⚡ KOLINSKI admin FE", Script = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua", Position = UDim2.new(0, 130, 0, 70)},
     {Name = "Z4troxHubButton", Text = "💀 z4trox Hub v1", Script = "https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/main/z4trox%20hub", Position = UDim2.new(0, 240, 0, 70)},
-    {Name = "NamelessAdminButton", Text = "👑 Nameless Admin", Script = "https://raw.githubusercontent.com/toyahfur/Nameless-Admin-2.0/main/unfinished-source-code", Position = UDim2.new(0, 120, 0, 110)},
+    {Name = "MadaAdminButton", Text = "👑 Mada Admin", Script = "https://raw.githubusercontent.com/Jfdedit3/Mada-admin/refs/heads/main/Mada%20admin2.txt", Position = UDim2.new(0, 120, 0, 110)},
     {Name = "CMDFeButton", Text = "🖥️ CMD FE", Script = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua", Position = UDim2.new(0, 230, 0, 110)},
     {Name = "NamelessMusicButton", Text = "🎵 Nameless music", Script = "https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main", Position = UDim2.new(0, 110, 0, 150)},
     {Name = "HonokaExecutorButton", Text = "🔧 Honoka Executor", Script = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox", Position = UDim2.new(0, 220, 0, 150)}
