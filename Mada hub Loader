@@ -1,289 +1,258 @@
-local NotificationLoad = loadstring(game:HttpGet(('https://raw.githubusercontent.com/treeofplant/Notif/main/library.lua'), true))()
-local ScreenGui = Instance.new("ScreenGui")
-local sound = Instance.new("Sound")
-local MainFrame = Instance.new("Frame")
-local MainFrameCorner = Instance.new("UICorner")
-local TitleLabel = Instance.new("TextLabel")
-local TitleCorner = Instance.new("UICorner")
-local DiscordLabel = Instance.new("TextLabel")
-local DiscordCorner = Instance.new("UICorner")
-local TabContainer = Instance.new("Frame")
-local TabContainerCorner = Instance.new("UICorner")
-local TabListLayout = Instance.new("UIListLayout")
-local MadaTab = Instance.new("TextButton")
-local MadaTabCorner = Instance.new("UICorner")
-local CloseButton = Instance.new("TextButton")
-local CloseButtonCorner = Instance.new("UICorner")
-local ToggleVisibilityButton = Instance.new("TextButton")
-local ToggleButtonCorner = Instance.new("UICorner")
-local TweenService = game:GetService("TweenService")
-local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local closeTweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-local buttons = {
-    {Name = "KolinskiButton", Text = "⚡ KOLINSKI admin FE", Script = "https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua", Position = UDim2.new(0, 130, 0, 70)},
-    {Name = "Z4troxHubButton", Text = "💀 z4trox Hub v1", Script = "https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/main/z4trox%20hub", Position = UDim2.new(0, 240, 0, 70)},
-    {Name = "MadaAdminButton", Text = "👑 Mada Admin", Script = "https://raw.githubusercontent.com/Jfdedit3/Mada-admin/refs/heads/main/Mada%20admin2.txt", Position = UDim2.new(0, 120, 0, 110)},
-    {Name = "CMDFeButton", Text = "🖥️ CMD FE", Script = "https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua", Position = UDim2.new(0, 230, 0, 110)},
-    {Name = "NamelessMusicButton", Text = "🎵 Nameless music", Script = "https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main", Position = UDim2.new(0, 110, 0, 150)},
-    {Name = "HonokaExecutorButton", Text = "🔧 Honoka Executor", Script = "https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox", Position = UDim2.new(0, 220, 0, 150)}
-}
-
--- Notification
-NotificationLoad:NewNotification({
-    Mode = "Custom",
-    Title = "HELLO!",
-    Description = "Welcome to Mada hub",
-    Notification_Image = "rbxassetid://",
-    Notification_Sound = "",
-    Timeout = 5,
-    Audio = false
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
+local Window = redzlib:MakeWindow({
+    Title = "Mada hub",
+    SubTitle = "by z4trox",
+    SaveFolder = "UniversalScriptConfig"
 })
-
-wait(5.3)
-
--- Configure ScreenGui
-ScreenGui.Name = "MadaHubGui"
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ResetOnSpawn = false
-
--- Configure sound
-sound.SoundId = "rbxassetid://5525281334"
-sound.Looped = false
-sound.Parent = workspace
-sound:Play()
-
--- Configure MainFrame with gradient
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Position = UDim2.new(0.5, -180, 0.5, -125)
-MainFrame.Size = UDim2.new(0, 360, 0, 250)
-MainFrame.BackgroundTransparency = 1
-MainFrameCorner.CornerRadius = UDim.new(0, 12)
-MainFrameCorner.Parent = MainFrame
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 30)), ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 50))}
-gradient.Rotation = 45
-gradient.Parent = MainFrame
-
--- Configure title
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TitleLabel.BorderSizePixel = 1
-TitleLabel.BorderColor3 = Color3.fromRGB(60, 60, 60)
-TitleLabel.Size = UDim2.new(1, 0, 0, 30)
-TitleLabel.Position = UDim2.new(0, 0, 0, 0)
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Text = "Mada Hub"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 18
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextTransparency = 1
-TitleCorner.CornerRadius = UDim.new(0, 12)
-TitleCorner.Parent = TitleLabel
-
--- Configure Discord label
-DiscordLabel.Name = "DiscordLabel"
-DiscordLabel.Parent = MainFrame
-DiscordLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-DiscordLabel.BorderSizePixel = 1
-DiscordLabel.BorderColor3 = Color3.fromRGB(60, 60, 60)
-DiscordLabel.Size = UDim2.new(1, 0, 0, 30)
-DiscordLabel.Position = UDim2.new(0, 0, 1, -30)
-DiscordLabel.Font = Enum.Font.Gotham
-DiscordLabel.Text = "discord.gg/a8DhGKRNEq"
-DiscordLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-DiscordLabel.TextSize = 14
-DiscordLabel.BackgroundTransparency = 1
-DiscordLabel.TextTransparency = 1
-DiscordCorner.CornerRadius = UDim.new(0, 12)
-DiscordCorner.Parent = DiscordLabel
-
--- Configure tab container
-TabContainer.Name = "TabContainer"
-TabContainer.Parent = MainFrame
-TabContainer.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-TabContainer.Position = UDim2.new(0, 0, 0, 30)
-TabContainer.Size = UDim2.new(0, 100, 1, -60)
-TabContainer.BackgroundTransparency = 1
-TabContainerCorner.CornerRadius = UDim.new(0, 12)
-TabContainerCorner.Parent = TabContainer
-
--- Configure tab list layout
-TabListLayout.Parent = TabContainer
-TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabListLayout.Padding = UDim.new(0, 5)
-TabListLayout.FillDirection = Enum.FillDirection.Vertical
-
--- Configure Mada tab
-MadaTab.Name = "MadaTab"
-MadaTab.Parent = TabContainer
-MadaTab.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-MadaTab.BorderSizePixel = 1
-MadaTab.BorderColor3 = Color3.fromRGB(70, 70, 70)
-MadaTab.Size = UDim2.new(1, 0, 0, 30)
-MadaTab.Position = UDim2.new(0, 0, 0, 0)
-MadaTab.Font = Enum.Font.GothamBold
-MadaTab.Text = "🏠 Home"
-MadaTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-MadaTab.TextSize = 16
-MadaTab.BackgroundTransparency = 1
-MadaTab.TextTransparency = 1
-MadaTabCorner.CornerRadius = UDim.new(0, 12)
-MadaTabCorner.Parent = MadaTab
-
--- Configure close button
-CloseButton.Name = "CloseButton"
-CloseButton.Parent = MainFrame
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-CloseButton.BorderSizePixel = 1
-CloseButton.BorderColor3 = Color3.fromRGB(200, 0, 0)
-CloseButton.Position = UDim2.new(1, -25, 0, 5)
-CloseButton.Size = UDim2.new(0, 20, 0, 20)
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 16
-CloseButton.BackgroundTransparency = 1
-CloseButton.TextTransparency = 1
-CloseButtonCorner.CornerRadius = UDim.new(0, 12)
-CloseButtonCorner.Parent = CloseButton
-
--- Configure script buttons
-for _, btnData in ipairs(buttons) do
-    local button = Instance.new("TextButton")
-    button.Name = btnData.Name
-    button.Parent = MainFrame
-    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    button.BorderSizePixel = 1
-    button.BorderColor3 = Color3.fromRGB(60, 60, 60)
-    button.Position = btnData.Position
-    button.Size = UDim2.new(0, 100, 0, 30) -- Increased size
-    button.Font = Enum.Font.Gotham
-    button.Text = btnData.Text
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = 12
-    button.BackgroundTransparency = 1
-    button.TextTransparency = 1
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
-    corner.Parent = button
-    button.MouseButton1Click:Connect(function()
-        button.Text = "Loading..."
-        spawn(function()
-            local ok, err = pcall(function()
-                loadstring(game:HttpGet(btnData.Script, true))()
-            end)
-            if not ok then
-                warn("Error loading "..btnData.Text..": "..err)
-            end
-            button.Text = btnData.Text
-        end)
-    end)
-    button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    end)
-    button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    end)
-end
-
--- Configure toggle visibility button
-ToggleVisibilityButton.Name = "ToggleVisibilityButton"
-ToggleVisibilityButton.Parent = ScreenGui
-ToggleVisibilityButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ToggleVisibilityButton.BorderColor3 = Color3.fromRGB(0, 0, 255)
-ToggleVisibilityButton.Position = UDim2.new(0.5, -67.5, 0.35, -150)
-ToggleVisibilityButton.Size = UDim2.new(0, 135, 0, 30)
-ToggleVisibilityButton.Font = Enum.Font.GothamBold
-ToggleVisibilityButton.Text = "Toggle UI"
-ToggleVisibilityButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleVisibilityButton.TextSize = 14
-ToggleVisibilityButton.Draggable = true
-ToggleVisibilityButton.BackgroundTransparency = 1
-ToggleVisibilityButton.TextTransparency = 1
-ToggleButtonCorner.CornerRadius = UDim.new(0, 12)
-ToggleButtonCorner.Parent = ToggleVisibilityButton
-ToggleVisibilityButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+Window:AddMinimizeButton({
+    Button = {
+        Image = "rbxassetid://77855434347030",
+        BackgroundTransparency = 0
+    },
+    Corner = {
+        CornerRadius = UDim.new(0, 8)
+    }
+})
+local customSpeed = 16
+local customJump = 50
+local customGravity = 196.2
+local speedEnabled = false
+local jumpEnabled = false
+local gravityEnabled = false
+local infiniteJumpEnabled = false
+local jumpConnection
+local MainCheatsTab = Window:MakeTab({"Universal Exploits", "bug"})
+MainCheatsTab:AddSection({"Speed Hacks"})
+local Toggle1 = MainCheatsTab:AddToggle({
+    Name = "Enable Speed Hack",
+    Description = "Use this to toggle your <font color='rgb(0, 0, 225)'>speed</font>",
+    Default = false
+})
+Toggle1:Callback(function(Value)
+    speedEnabled = Value
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = Value and customSpeed or 16
+    else
+        warn("Humanoid not found.")
+    end
 end)
-
--- Introduction animation
-MainFrame.Size = UDim2.new(0, 360 * 0.8, 0, 250 * 0.8)
-local mainFrameTween = TweenService:Create(MainFrame, tweenInfo, {
-    BackgroundTransparency = 0,
-    Size = UDim2.new(0, 360, 0, 250),
-    Position = UDim2.new(0.5, -180, 0.5, -125)
-})
-mainFrameTween:Play()
-
--- Animate elements
-local function animateElement(element)
-    local bgTween = TweenService:Create(element, tweenInfo, { BackgroundTransparency = 0 })
-    bgTween:Play()
-    if element:IsA("TextButton") or element:IsA("TextLabel") then
-        local textTween = TweenService:Create(element, tweenInfo, { TextTransparency = 0 })
-        textTween:Play()
-    end
-end
-
--- Animate close elements
-local function animateCloseElement(element)
-    local bgTween = TweenService:Create(element, closeTweenInfo, { BackgroundTransparency = 1 })
-    bgTween:Play()
-    if element:IsA("TextButton") or element:IsA("TextLabel") then
-        local textTween = TweenService:Create(element, closeTweenInfo, { TextTransparency = 1 })
-        textTween:Play()
-    end
-end
-
--- Animate elements with delay for introduction
-local delay = 0.1
-animateElement(TitleLabel)
-wait(delay)
-animateElement(DiscordLabel)
-wait(delay)
-animateElement(TabContainer)
-animateElement(MadaTab)
-wait(delay)
-for _, btnData in ipairs(buttons) do
-    local button = MainFrame:FindFirstChild(btnData.Name)
-    if button then
-        animateElement(button)
-        wait(delay)
-    end
-end
-animateElement(CloseButton)
-wait(delay)
-animateElement(ToggleVisibilityButton)
-
--- Close animation
-CloseButton.Activated:Connect(function()
-    animateCloseElement(ToggleVisibilityButton)
-    wait(delay)
-    animateCloseElement(CloseButton)
-    wait(delay)
-    for i = #buttons, 1, -1 do
-        local button = MainFrame:FindFirstChild(buttons[i].Name)
-        if button then
-            animateCloseElement(button)
-            wait(delay)
+MainCheatsTab:AddTextBox({
+    Name = "Speed Modifier TextBox",
+    Description = "Use this to change your <font color='rgb(0, 0, 225)'>speed</font>",
+    PlaceholderText = "Enter speed value",
+    Callback = function(Value)
+        local speedValue = tonumber(Value)
+        if not speedValue then
+            warn("Invalid input. Please enter a valid number for speed.")
+            return
+        end
+        customSpeed = speedValue
+        if speedEnabled then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = customSpeed
+            end
         end
     end
-    animateCloseElement(MadaTab)
-    animateCloseElement(TabContainer)
-    wait(delay)
-    animateCloseElement(DiscordLabel)
-    wait(delay)
-    animateCloseElement(TitleLabel)
-    wait(delay)
-    local mainFrameCloseTween = TweenService:Create(MainFrame, closeTweenInfo, {
-        BackgroundTransparency = 1,
-        Size = UDim2.new(0, 360 * 0.8, 0, 250 * 0.8)
-    })
-    mainFrameCloseTween:Play()
-    mainFrameCloseTween.Completed:Connect(function()
-        ScreenGui.Enabled = false
-    end)
+})
+MainCheatsTab:AddSection({"JumpPower Hacks"})
+local JumpToggle = MainCheatsTab:AddToggle({
+    Name = "Enable JumpPower Hack",
+    Description = "Use this to toggle your <font color='rgb(0, 255, 255)'>JumpPower</font>",
+    Default = false
+})
+JumpToggle:Callback(function(Value)
+    jumpEnabled = Value
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = Value and customJump or 50
+    else
+        warn("Humanoid not found.")
+    end
 end)
+MainCheatsTab:AddTextBox({
+    Name = "JumpPower Modifier TextBox",
+    Description = "Use this to change your <font color='rgb(0, 255, 255)'>JumpPower</font>",
+    PlaceholderText = "Enter jump power value",
+    Callback = function(Value)
+        local jumpValue = tonumber(Value)
+        if not jumpValue then
+            warn("Invalid input. Please enter a valid number for JumpPower.")
+            return
+        end
+        customJump = jumpValue
+        if jumpEnabled then
+            local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = customJump
+            end
+        end
+    end
+})
+MainCheatsTab:AddSection({"Gravity Modification"})
+local GravityToggle = MainCheatsTab:AddToggle({
+    Name = "Enable Gravity Modification",
+    Description = "Use this to toggle your <font color='rgb(128, 128, 128)'>Gravity</font>",
+    Default = false
+})
+GravityToggle:Callback(function(Value)
+    gravityEnabled = Value
+    game.Workspace.Gravity = Value and customGravity or 196.2
+end)
+MainCheatsTab:AddTextBox({
+    Name = "Gravity Modifier TextBox",
+    Description = "Use this to change your <font color='rgb(128, 128, 128)'>Gravity</font>",
+    PlaceholderText = "Enter gravity value",
+    Callback = function(Value)
+        local gravValue = tonumber(Value)
+        if not gravValue then
+            warn("Invalid input. Please enter a valid number for Gravity.")
+            return
+        end
+        customGravity = gravValue
+        if gravityEnabled then
+            game.Workspace.Gravity = customGravity
+        end
+    end
+})
+MainCheatsTab:AddSection({"Infinite Jump"})
+local InfiniteJumpToggle = MainCheatsTab:AddToggle({
+    Name = "Enable Infinite Jump",
+    Description = "Use this to toggle <font color='rgb(255, 0, 0)'>Infinite Jump</font>",
+    Default = false
+})
+InfiniteJumpToggle:Callback(function(Value)
+    infiniteJumpEnabled = Value
+    if Value then
+        if not jumpConnection then
+            jumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                if infiniteJumpEnabled then
+                    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:ChangeState("Jumping")
+                    end
+                end
+            end)
+        end
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+    end
+end)
+local UniversalScriptsTab = Window:MakeTab({"Universal Scripts", "code"})
+UniversalScriptsTab:AddButton({
+    Name = "<font color='rgb(255, 0, 0)'>Infinite Yield</font>",
+    Description = "Loads Infinite Yield.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end
+})
+UniversalScriptsTab:AddButton({
+    Name = "<font color='rgb(128, 128, 128)'>Dex Explorer</font>",
+    Description = "Loads Dex Explorer.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/peyton2465/Dex/master/out.lua"))()
+    end
+})
+local MadaScriptTab = Window:MakeTab({"Mada Script", "home"})
+MadaScriptTab:AddSection({"Mada Script Scripts"})
+MadaScriptTab:AddButton({
+    Name = "⚡ KOLINSKI admin FE",
+    Description = "Loads KOLINSKI admin FE script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/KOLINSKI/refs/heads/main/KOLINSKI.lua", true))()
+    end
+})
+MadaScriptTab:AddButton({
+    Name = "💀 z4trox Hub v1",
+    Description = "Loads z4trox Hub v1 script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/z4trox-hub-v1/main/z4trox%20hub", true))()
+    end
+})
+MadaScriptTab:AddButton({
+    Name = "👑 Mada Admin",
+    Description = "Loads Mada Admin script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Mada-admin/refs/heads/main/Mada%20admin2.txt", true))()
+    end
+})
+MadaScriptTab:AddButton({
+    Name = "🖥️ CMD FE",
+    Description = "Loads CMD FE script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/cmd/main/testing-main.lua", true))()
+    end
+})
+MadaScriptTab:AddButton({
+    Name = "🎵 Nameless music",
+    Description = "Loads Nameless music script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Nameless-music-lunch/refs/heads/main/Main", true))()
+    end
+})
+MadaScriptTab:AddButton({
+    Name = "🔧 Honoka Executor",
+    Description = "Loads Honoka Executor script.",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/honoka-executor/main/Honoka%20executor%20byz4trox", true))()
+    end
+})
+local MusicTab = Window:MakeTab({"Music", "music"})
+local sound = Instance.new("Sound", game.Workspace)
+MusicTab:AddTextBox({
+    Name = "Music ID TextBox",
+    Description = "Enter a music ID to play",
+    PlaceholderText = "Music ID",
+    Callback = function(Value)
+        if Value and Value ~= "" then
+            sound.SoundId = "rbxassetid://" .. Value
+            sound:Play()
+        else
+            warn("Invalid Music ID")
+        end
+    end
+})
+MusicTab:AddButton({
+    Name = "Music: 107764433772204",
+    Description = "Plays music ID 107764433772204",
+    Callback = function()
+        sound.SoundId = "rbxassetid://107764433772204"
+        sound:Play()
+    end
+})
+MusicTab:AddButton({
+    Name = "Music: 16662830706",
+    Description = "Plays music ID 16662830706",
+    Callback = function()
+        sound.SoundId = "rbxassetid://16662830706"
+        sound:Play()
+    end
+})
+MusicTab:AddButton({
+    Name = "Music: 1836142077",
+    Description = "Plays music ID 1836142077",
+    Callback = function()
+        sound.SoundId = "rbxassetid://1836142077"
+        sound:Play()
+    end
+})
+MusicTab:AddButton({
+    Name = "Music: 112723885774179",
+    Description = "Plays music ID 112723885774179",
+    Callback = function()
+        sound.SoundId = "rbxassetid://112723885774179"
+        sound:Play()
+    end
+})
+MusicTab:AddButton({
+    Name = "Music: 81902909302285",
+    Description = "Plays music ID 81902909302285",
+    Callback = function()
+        sound.SoundId = "rbxassetid://81902909302285"
+        sound:Play()
+    end
+})
