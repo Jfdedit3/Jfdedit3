@@ -1,6 +1,4 @@
 -- Fly Script
--- z4trox x chatgpt 
-
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
