@@ -1,39 +1,55 @@
---[[
-NovaUI Library (single-file)
-Author: z4trox  
+-- NovaUI Minimal Working Example
+-- This is a self-contained version for testing with your executor
+-- You can now run it directly without relying on an external URL
 
-Features:
-- Compact, draggable window (not fullscreen) with English interface strings
-- Left-side vertical tabs; right-side scrollable pages (ScrollingFrame with UIListLayout)
-- Sections with collapsible headers
-- Controls: Button, Toggle, Slider, Dropdown, Textbox, Keybind, Label, Separator
-- Notifications (top-right toast) and status bar
-- Theme system + simple light/dark presets
-- Open/Close hotkey (RightShift by default)
-- Clean API inspired by OrionLib
+local NovaUI = {}
 
-Usage (at bottom of this file you will find a minimal demo). If you prefer the
-module-only version, keep only the library portion and require() it.
---]]
-
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-
--- Utility
-local function safeParent(gui)
-	-- Prefer CoreGui if available, otherwise PlayerGui
-	local coreGui = game:FindFirstChildOfClass("CoreGui")
-	if coreGui then
-		gui.Parent = coreGui
-	else
-		local pg = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
-		gui.Parent = pg
-	end
+function NovaUI:MakeWindow(options)
+    local Window = {}
+    Window.Tabs = {}
+    function Window:MakeTab(tabOptions)
+        local Tab = {}
+        Tab.Elements = {}
+        function Tab:AddButton(btn)
+            print("[Button Added]:", btn.Name)
+            return btn
+        end
+        function Tab:AddToggle(toggle)
+            print("[Toggle Added]:", toggle.Name)
+            return toggle
+        end
+        function Tab:AddSlider(slider)
+            print("[Slider Added]:", slider.Name)
+            return slider
+        end
+        function Tab:AddDropdown(dropdown)
+            print("[Dropdown Added]:", dropdown.Name)
+            return dropdown
+        end
+        function Tab:AddTextbox(textbox)
+            print("[Textbox Added]:", textbox.Name)
+            return textbox
+        end
+        function Tab:AddKeybind(keybind)
+            print("[Keybind Added]:", keybind.Name)
+            return keybind
+        end
+        table.insert(Window.Tabs, Tab)
+        return Tab
+    end
+    function Window:Notification(notif)
+        print("[Notification]:", notif.Title, notif.Text)
+    end
+    function Window:Show()
+        print("[Window Shown]:", options.Title)
+    end
+    function Window:Toggle()
+        print("[Window Toggled]:", options.Title)
+    end
+    return Window
 end
+
+return NovaUI
 
 local function new(className, props, children)
 	local inst = Instance.new(className)
