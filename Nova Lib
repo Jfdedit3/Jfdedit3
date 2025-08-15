@@ -1,39 +1,674 @@
 --[[
-    NovaUI.lua — Librairie UI inspirée d'OrionLib (fichier unique)
-    Auteur: ChatGPT (GPT-5 Thinking)
+NovaUI Library (single-file)
+Author: ChatGPT (GPT-5 Thinking)
 
-    ✅ Points clés
-    - Fenêtre, Tabs, Sections
-    - Éléments: Button, Toggle, Slider, Dropdown (mono & multi), Textbox, Label, Keybind, ColorPicker
-    - Notifications
-    - Thèmes personnalisables
-    - Sauvegarde/chargement de configuration (writefile/readfile si dispo, sinon in-memory)
-    - Entièrement self-contained, aucun asset externe
+Features:
+- Compact, draggable window (not fullscreen) with English interface strings
+- Left-side vertical tabs; right-side scrollable pages (ScrollingFrame with UIListLayout)
+- Sections with collapsible headers
+- Controls: Button, Toggle, Slider, Dropdown, Textbox, Keybind, Label, Separator
+- Notifications (top-right toast) and status bar
+- Theme system + simple light/dark presets
+- Open/Close hotkey (RightShift by default)
+- Clean API inspired by OrionLib
 
-    🔧 Utilisation rapide (exemple à la fin du fichier)
-]]
+Usage (at bottom of this file you will find a minimal demo). If you prefer the
+module-only version, keep only the library portion and require() it.
+--]]
 
-local NovaUI = {}
-NovaUI._version = "1.0.0"
-
--- Services
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
--- Helpers sécurité d'environnement
-local can_write = (typeof(writefile) == "function") and (typeof(isfolder) == "function") and (typeof(makefolder) == "function") and (typeof(readfile) == "function")
-local config_root = "NovaUI_Configs"
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
--- Thème par défaut
-NovaUI.Theme = {
-    Primary = Color3.fromRGB(107, 142, 255), -- accent
-    Bg = Color3.fromRGB(18, 18, 22),
-    Bg2 = Color3.fromRGB(24, 24, 30),
-    Stroke = Color3.fromRGB(48, 48, 60),
-    Text = Color3.fromRGB(235, 235, 245),
-    SubText = Color3.fromRGB(170, 170, 185),
+-- Utility
+local function safeParent(gui)
+	-- Prefer CoreGui if available, otherwise PlayerGui
+	local coreGui = game:FindFirstChildOfClass("CoreGui")
+	if coreGui then
+		gui.Parent = coreGui
+	else
+		local pg = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
+		gui.Parent = pg
+	end
+end
+
+local function new(className, props, children)
+	local inst = Instance.new(className)
+	if props then
+		for k, v in pairs(props) do
+			inst[k] = v
+		end
+	end
+	if children then
+		for _, child in ipairs(children) do
+			child.Parent = inst
+		end
+	end
+	return inst
+end
+
+local function tween(o, t, goal)
+	return TweenService:Create(o, TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), goal)
+end
+
+local function round(n, inc)
+	inc = inc or 1
+	return math.floor(n / inc + 0.5) * inc
+end
+
+local ThemePresets = {
+	Dark = {
+		Primary = Color3.fromRGB(28, 28, 32),
+		PrimaryAlt = Color3.fromRGB(36, 36, 42),
+		Accent = Color3.fromRGB(99, 102, 241),
+		Accent2 = Color3.fromRGB(129, 140, 248),
+		Text = Color3.fromRGB(235, 235, 245),
+		TextDim = Color3.fromRGB(180, 183, 192),
+		Stroke = Color3.fromRGB(60, 60, 70),
+		Good = Color3.fromRGB(34, 197, 94),
+		Warn = Color3.fromRGB(245, 158, 11),
+		Bad  = Color3.fromRGB(239, 68, 68),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Glass = Color3.fromRGB(255, 255, 255),
+		GlassTransparency = 0.95,
+	},
+	Light = {
+		Primary = Color3.fromRGB(246, 247, 249),
+		PrimaryAlt = Color3.fromRGB(236, 238, 242),
+		Accent = Color3.fromRGB(59, 130, 246),
+		Accent2 = Color3.fromRGB(96, 165, 250),
+		Text = Color3.fromRGB(23, 23, 28),
+		TextDim = Color3.fromRGB(90, 94, 108),
+		Stroke = Color3.fromRGB(210, 214, 220),
+		Good = Color3.fromRGB(16, 185, 129),
+		Warn = Color3.fromRGB(217, 119, 6),
+		Bad  = Color3.fromRGB(220, 38, 38),
+		Shadow = Color3.fromRGB(0, 0, 0),
+		Glass = Color3.fromRGB(255, 255, 255),
+		GlassTransparency = 0.2,
+	},
+}
+
+local NovaUI = {}
+NovaUI.__index = NovaUI
+
+NovaUI._instances = {}
+
+function NovaUI:CreateWindow(cfg)
+	cfg = cfg or {}
+	local theme = cfg.Theme and ThemePresets[cfg.Theme] or ThemePresets.Dark
+	local size = cfg.Size or Vector2.new(720, 440) -- compact, not fullscreen
+	local title = cfg.Title or "Nova UI"
+	local subtitle = cfg.Subtitle or "Interface"
+	local initTab = nil
+
+	local ScreenGui = new("ScreenGui", { Name = "NovaUI_ScreenGui", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling })
+	safeParent(ScreenGui)
+
+	-- Drop shadow container
+	local Shadow = new("Frame", {
+		Name = "Shadow",
+		Parent = ScreenGui,
+		BackgroundColor3 = theme.Shadow,
+		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(size.X + 40, size.Y + 40),
+		Position = UDim2.new(0.5, 20, 0.5, 20),
+		AnchorPoint = Vector2.new(0.5, 0.5)
+	})
+
+	local Main = new("Frame", {
+		Name = "Main",
+		Parent = ScreenGui,
+		BackgroundColor3 = theme.Primary,
+		BorderSizePixel = 0,
+		Size = UDim2.fromOffset(size.X, size.Y),
+		Position = UDim2.fromScale(0.5, 0.5),
+		AnchorPoint = Vector2.new(0.5, 0.5)
+	})
+
+	local UICornerMain = new("UICorner", { CornerRadius = UDim.new(0, 14), Parent = Main })
+	local UIStrokeMain = new("UIStroke", { Color = theme.Stroke, Thickness = 1, Transparency = 0.2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = Main })
+
+	-- Title Bar
+	local TitleBar = new("Frame", {
+		Name = "TitleBar",
+		Parent = Main,
+		Size = UDim2.new(1, 0, 0, 44),
+		BackgroundColor3 = theme.PrimaryAlt,
+		BorderSizePixel = 0
+	})
+	new("UICorner", { CornerRadius = UDim.new(0, 14), Parent = TitleBar })
+
+	local TitleLabel = new("TextLabel", {
+		Name = "Title",
+		Parent = TitleBar,
+		BackgroundTransparency = 1,
+		Text = title,
+		Font = Enum.Font.GothamMedium,
+		TextSize = 18,
+		TextColor3 = theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, 16, 0, 4),
+		Size = UDim2.new(1, -120, 0, 24)
+	})
+
+	local SubtitleLabel = new("TextLabel", {
+		Name = "Subtitle",
+		Parent = TitleBar,
+		BackgroundTransparency = 1,
+		Text = subtitle,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = theme.TextDim,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, 16, 0, 24),
+		Size = UDim2.new(1, -120, 0, 18)
+	})
+
+	local CloseBtn = new("TextButton", {
+		Name = "Close",
+		Parent = TitleBar,
+		Text = "✕",
+		Font = Enum.Font.GothamBold,
+		TextSize = 18,
+		TextColor3 = theme.TextDim,
+		BackgroundTransparency = 1,
+		AutoButtonColor = false,
+		Size = UDim2.fromOffset(36, 36),
+		Position = UDim2.new(1, -40, 0, 4)
+	})
+
+	local MinBtn = new("TextButton", {
+		Name = "Minimize",
+		Parent = TitleBar,
+		Text = "—",
+		Font = Enum.Font.GothamBold,
+		TextSize = 18,
+		TextColor3 = theme.TextDim,
+		BackgroundTransparency = 1,
+		AutoButtonColor = false,
+		Size = UDim2.fromOffset(36, 36),
+		Position = UDim2.new(1, -80, 0, 4)
+	})
+
+	-- Tabs column
+	local TabsCol = new("Frame", {
+		Name = "Tabs",
+		Parent = Main,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 180, 1, -44),
+		Position = UDim2.new(0, 0, 0, 44)
+	})
+
+	local TabsList = new("ScrollingFrame", {
+		Name = "TabsList",
+		Parent = TabsCol,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 4,
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		Size = UDim2.new(1, 0, 1, -8),
+		Position = UDim2.fromOffset(0, 8)
+	})
+	new("UIListLayout", { Parent = TabsList, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6) })
+	new("UIPadding", { Parent = TabsList, PaddingTop = UDim.new(0, 6), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), PaddingBottom = UDim.new(0, 6) })
+
+	-- Content area
+	local Content = new("Frame", {
+		Name = "Content",
+		Parent = Main,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, -180, 1, -44),
+		Position = UDim2.new(0, 180, 0, 44)
+	})
+
+	local Pages = new("Folder", { Name = "Pages", Parent = Content })
+
+	-- Status bar
+	local StatusBar = new("TextLabel", {
+		Name = "Status",
+		Parent = Main,
+		BackgroundTransparency = 1,
+		Text = "Ready",
+		Font = Enum.Font.Gotham,
+		TextSize = 12,
+		TextColor3 = theme.TextDim,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Size = UDim2.new(1, -16, 0, 18),
+		Position = UDim2.new(0, 8, 1, -20)
+	})
+
+	-- Draggable window
+	local dragging = false
+	local dragStart, startPos
+	TitleBar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = Main.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+
+	-- Minimize & Close
+	local minimized = false
+	MinBtn.MouseButton1Click:Connect(function()
+		minimized = not minimized
+		tween(Content, 0.2, { Size = minimized and UDim2.new(1, -180, 0, 0) or UDim2.new(1, -180, 1, -44) }):Play()
+		StatusBar.Text = minimized and "Minimized" or "Ready"
+	end)
+
+	CloseBtn.MouseButton1Click:Connect(function()
+		ScreenGui:Destroy()
+	end)
+
+	-- Hotkey to toggle visibility (RightShift)
+	local toggleKey = cfg.ToggleKey or Enum.KeyCode.RightShift
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if not processed and input.KeyCode == toggleKey then
+			ScreenGui.Enabled = not ScreenGui.Enabled
+		end
+	end)
+
+	-- Notifications container
+	local ToastContainer = new("Frame", {
+		Name = "Toasts",
+		Parent = ScreenGui,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 300, 1, -20),
+		Position = UDim2.new(1, -320, 0, 10)
+	})
+	new("UIListLayout", { Parent = ToastContainer, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) })
+
+	-- Window object
+	local window = {
+		_Gui = ScreenGui,
+		_Main = Main,
+		_TabsList = TabsList,
+		_Pages = Pages,
+		_Status = StatusBar,
+		_Theme = theme,
+		_ToastContainer = ToastContainer,
+		_Tabs = {},
+	}
+
+	function window:SetStatus(text)
+		StatusBar.Text = text or ""
+	end
+
+	function window:Notify(titleText, message, duration)
+		duration = duration or 3
+		local card = new("Frame", {
+			Parent = ToastContainer,
+			BackgroundColor3 = theme.PrimaryAlt,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 0, 0)
+		})
+		new("UICorner", { Parent = card, CornerRadius = UDim.new(0, 10) })
+		new("UIStroke", { Parent = card, Color = theme.Stroke, Transparency = 0.3 })
+		local pad = new("UIPadding", { Parent = card, PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10) })
+		local titleL = new("TextLabel", { Parent = card, BackgroundTransparency = 1, Text = titleText or "Notification", Font = Enum.Font.GothamSemibold, TextSize = 14, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -20, 0, 18) })
+		local bodyL = new("TextLabel", { Parent = card, BackgroundTransparency = 1, Text = message or "", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.TextDim, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.new(0, 0, 0, 20), Size = UDim2.new(1, -20, 0, 18) })
+		card.Size = UDim2.new(1, 0, 0, titleL.TextBounds.Y + bodyL.TextBounds.Y + pad.PaddingTop.Offset + pad.PaddingBottom.Offset + 10)
+		tween(card, 0.2, { BackgroundTransparency = 0 }):Play()
+		task.delay(duration, function()
+			if card and card.Parent then
+				tween(card, 0.2, { BackgroundTransparency = 1 }):Play()
+				RunService.Heartbeat:Wait()
+				card:Destroy()
+			end
+		end)
+	end
+
+	local function makeTabButton(tabName)
+		local btn = new("TextButton", {
+			Parent = TabsList,
+			Text = tabName,
+			Font = Enum.Font.GothamMedium,
+			TextSize = 14,
+			TextColor3 = theme.Text,
+			BackgroundColor3 = theme.PrimaryAlt,
+			AutoButtonColor = true,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1, 0, 0, 36)
+		})
+		new("UICorner", { Parent = btn, CornerRadius = UDim.new(0, 8) })
+		new("UIStroke", { Parent = btn, Color = theme.Stroke, Transparency = 0.4 })
+		return btn
+	end
+
+	local function makePage()
+		local scroller = new("ScrollingFrame", {
+			Parent = Pages,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			ScrollBarThickness = 4,
+			CanvasSize = UDim2.new(),
+			AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			Size = UDim2.fromScale(1, 1),
+			Visible = false
+		})
+		new("UIListLayout", { Parent = scroller, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 10) })
+		new("UIPadding", { Parent = scroller, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10) })
+		return scroller
+	end
+
+	local function selectTab(tab)
+		for _, t in ipairs(window._Tabs) do
+			t.Page.Visible = (t == tab)
+			t.Selected = (t == tab)
+			tween(t.Button, 0.15, { BackgroundColor3 = t.Selected and theme.Accent or theme.PrimaryAlt, TextColor3 = t.Selected and Color3.new(1,1,1) or theme.Text }):Play()
+		end
+		window:SetStatus("Tab: " .. (tab.Name or ""))
+	end
+
+	function window:CreateTab(tabName)
+		tabName = tabName or "Tab"
+		local btn = makeTabButton(tabName)
+		local page = makePage()
+		local tab = { Name = tabName, Button = btn, Page = page, Sections = {}, Selected = false }
+		table.insert(window._Tabs, tab)
+		btn.MouseButton1Click:Connect(function() selectTab(tab) end)
+		if not initTab then initTab = tab selectTab(tab) end
+
+		function tab:AddSection(sectionTitle, collapsible)
+			local section = {}
+			local holder = new("Frame", { Parent = page, BackgroundColor3 = theme.PrimaryAlt, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 44) })
+			new("UICorner", { Parent = holder, CornerRadius = UDim.new(0, 10) })
+			new("UIStroke", { Parent = holder, Color = theme.Stroke, Transparency = 0.3 })
+			local layout = new("UIListLayout", { Parent = holder, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) })
+			new("UIPadding", { Parent = holder, PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10) })
+
+			local header = new("Frame", { Parent = holder, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24) })
+			local titleL = new("TextLabel", { Parent = header, BackgroundTransparency = 1, Text = sectionTitle or "Section", Font = Enum.Font.GothamSemibold, TextSize = 14, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -30, 1, 0) })
+			local caret = new("TextButton", { Parent = header, Text = collapsible and "▼" or "", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = theme.TextDim, BackgroundTransparency = 1, AutoButtonColor = false, Size = UDim2.fromOffset(24, 24), Position = UDim2.new(1, -24, 0, 0) })
+
+			local content = new("Frame", { Parent = holder, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0) })
+			local contentList = new("UIListLayout", { Parent = content, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) })
+
+			local expanded = true
+			local function setExpanded(v)
+				expanded = v
+				caret.Text = expanded and "▼" or "▶"
+				local targetY = 0
+				for _, c in ipairs(content:GetChildren()) do
+					if c:IsA("GuiObject") then targetY += c.AbsoluteSize.Y + contentList.Padding.Offset end
+				end
+				if not expanded then targetY = 0 end
+				tween(content, 0.15, { Size = UDim2.new(1, 0, 0, targetY) }):Play()
+			end
+
+			if collapsible then
+				caret.MouseButton1Click:Connect(function()
+					setExpanded(not expanded)
+				end)
+				RunService.Heartbeat:Wait()
+				setExpanded(true)
+			else
+				content.Size = UDim2.new(1, 0, 0, 0)
+				RunService.Heartbeat:Wait()
+				setExpanded(true)
+			end
+
+			local function controlContainer(height)
+				local item = new("Frame", { Parent = content, BackgroundColor3 = theme.Primary, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, height or 40) })
+				new("UICorner", { Parent = item, CornerRadius = UDim.new(0, 8) })
+				new("UIStroke", { Parent = item, Color = theme.Stroke, Transparency = 0.5 })
+				return item
+			end
+
+			function section:AddLabel(text)
+				local box = controlContainer(36)
+				new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = text or "Label", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -16, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				return box
+			end
+
+			function section:AddSeparator()
+				local sep = new("Frame", { Parent = content, BackgroundColor3 = theme.Stroke, BorderSizePixel = 0, Size = UDim2.new(1, -8, 0, 1) })
+				return sep
+			end
+
+			function section:AddButton(opts)
+				opts = opts or {}
+				local text = opts.Text or "Button"
+				local callback = opts.Callback or function() end
+				local btn = controlContainer(40)
+				local t = new("TextButton", { Parent = btn, BackgroundTransparency = 1, Text = text, Font = Enum.Font.GothamSemibold, TextSize = 14, TextColor3 = theme.Text, AutoButtonColor = false, Size = UDim2.new(1, -16, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				t.MouseButton1Click:Connect(function()
+					window:Notify("Button", text .. " pressed", 1.5)
+					callback()
+				end)
+				return t
+			end
+
+			function section:AddToggle(opts)
+				opts = opts or {}
+				local text = opts.Text or "Toggle"
+				local state = opts.Default or false
+				local callback = opts.Callback or function() end
+				local box = controlContainer(40)
+				local label = new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = text, Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -64, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				local switch = new("TextButton", { Parent = box, Text = state and "ON" or "OFF", Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = Color3.new(1,1,1), BackgroundColor3 = state ? theme.Good : theme.Bad, AutoButtonColor = false, Size = UDim2.fromOffset(56, 24), Position = UDim2.new(1, -64, 0.5, -12) })
+				new("UICorner", { Parent = switch, CornerRadius = UDim.new(1, 0) })
+				switch.MouseButton1Click:Connect(function()
+					state = not state
+					switch.Text = state and "ON" or "OFF"
+					tween(switch, 0.15, { BackgroundColor3 = state and theme.Good or theme.Bad }):Play()
+					callback(state)
+				end)
+				return { Set = function(_, v)
+					state = not not v
+					switch.Text = state and "ON" or "OFF"
+					switch.BackgroundColor3 = state and theme.Good or theme.Bad
+				end }
+			end
+
+			function section:AddSlider(opts)
+				opts = opts or {}
+				local text = opts.Text or "Slider"
+				local min = opts.Min or 0
+				local max = opts.Max or 100
+				local default = math.clamp(opts.Default or min, min, max)
+				local step = opts.Step or 1
+				local callback = opts.Callback or function() end
+
+				local box = controlContainer(52)
+				local label = new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = ("%s: %s"):format(text, tostring(default)), Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -16, 0, 18), Position = UDim2.new(0, 8, 0, 6) })
+				local track = new("Frame", { Parent = box, BackgroundColor3 = theme.Stroke, BorderSizePixel = 0, Size = UDim2.new(1, -16, 0, 6), Position = UDim2.new(0, 8, 0, 34) })
+				local fill = new("Frame", { Parent = track, BackgroundColor3 = theme.Accent, BorderSizePixel = 0, Size = UDim2.new((default - min) / (max - min), 0, 1, 0) })
+				new("UICorner", { Parent = track, CornerRadius = UDim.new(1, 0) })
+				new("UICorner", { Parent = fill, CornerRadius = UDim.new(1, 0) })
+
+				local value = default
+				local function setVal(v)
+					v = round(math.clamp(v, min, max), step)
+					value = v
+					label.Text = ("%s: %s"):format(text, tostring(value))
+					fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+					callback(value)
+				end
+
+				track.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+						local conn
+						local function update(pos)
+							local rel = (pos.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
+							setVal(min + rel * (max - min))
+						end
+						update(input.Position)
+						conn = UserInputService.InputChanged:Connect(function(ch)
+							if ch.UserInputType == Enum.UserInputType.MouseMovement or ch.UserInputType == Enum.UserInputType.Touch then
+								update(ch.Position)
+							end
+						end)
+						local endedConn
+						endedConn = UserInputService.InputEnded:Connect(function(endInput)
+							if endInput.UserInputType == Enum.UserInputType.MouseButton1 or endInput.UserInputType == Enum.UserInputType.Touch then
+								if conn then conn:Disconnect() end
+								if endedConn then endedConn:Disconnect() end
+							end
+						end)
+					end
+				end)
+
+				return { Set = function(_, v) setVal(v) end }
+			end
+
+			function section:AddDropdown(opts)
+				opts = opts or {}
+				local text = opts.Text or "Dropdown"
+				local list = opts.Values or {"A","B","C"}
+				local default = opts.Default or list[1]
+				local callback = opts.Callback or function() end
+
+				local box = controlContainer(44)
+				local label = new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = text .. ": " .. tostring(default), Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -40, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				local caret = new("TextButton", { Parent = box, BackgroundTransparency = 1, Text = "▼", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = theme.TextDim, AutoButtonColor = false, Size = UDim2.fromOffset(24, 24), Position = UDim2.new(1, -32, 0.5, -12) })
+
+				local menu
+				local function openMenu()
+					if menu and menu.Parent then menu:Destroy() end
+					menu = new("Frame", { Parent = box, BackgroundColor3 = theme.PrimaryAlt, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, math.min(160, #list * 28)), Position = UDim2.new(0, 0, 1, 6) })
+					new("UICorner", { Parent = menu, CornerRadius = UDim.new(0, 8) })
+					new("UIStroke", { Parent = menu, Color = theme.Stroke, Transparency = 0.4 })
+					local sc = new("ScrollingFrame", { Parent = menu, BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 4, AutomaticCanvasSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1,1) })
+					new("UIListLayout", { Parent = sc, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 4) })
+					new("UIPadding", { Parent = sc, PaddingTop = UDim.new(0, 6), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6) })
+					for _, v in ipairs(list) do
+						local it = new("TextButton", { Parent = sc, Text = tostring(v), Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, BackgroundColor3 = theme.Primary, BorderSizePixel = 0, AutoButtonColor = true, Size = UDim2.new(1, 0, 0, 26) })
+						new("UICorner", { Parent = it, CornerRadius = UDim.new(0, 6) })
+						it.MouseButton1Click:Connect(function()
+							default = v
+							label.Text = text .. ": " .. tostring(v)
+							if menu then menu:Destroy() end
+							callback(v)
+						end)
+					end
+				end
+				caret.MouseButton1Click:Connect(openMenu)
+
+				return { Set = function(_, v)
+					default = v
+					label.Text = text .. ": " .. tostring(v)
+				end, Refresh = function(_, values)
+					list = values
+					if menu then menu:Destroy() end
+				end }
+			end
+
+			function section:AddTextbox(opts)
+				opts = opts or {}
+				local text = opts.Text or "Textbox"
+				local placeholder = opts.Placeholder or "Type here..."
+				local default = opts.Default or ""
+				local clearOnFocus = opts.ClearOnFocus ~= false
+				local callback = opts.Callback or function() end
+
+				local box = controlContainer(44)
+				local label = new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = text, Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(0.35, -16, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				local input = new("TextBox", { Parent = box, BackgroundColor3 = theme.PrimaryAlt, BorderSizePixel = 0, PlaceholderText = placeholder, Text = default, ClearTextOnFocus = clearOnFocus, Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, Size = UDim2.new(0.6, -16, 0, 28), Position = UDim2.new(1, -10, 0.5, -14), AnchorPoint = Vector2.new(1, 0) })
+				new("UICorner", { Parent = input, CornerRadius = UDim.new(0, 6) })
+				new("UIStroke", { Parent = input, Color = theme.Stroke, Transparency = 0.5 })
+				input.FocusLost:Connect(function(enter)
+					callback(input.Text, enter)
+				end)
+				return input
+			end
+
+			function section:AddKeybind(opts)
+				opts = opts or {}
+				local text = opts.Text or "Keybind"
+				local default = opts.Default or Enum.KeyCode.F
+				local callback = opts.Callback or function() end
+
+				local box = controlContainer(40)
+				local label = new("TextLabel", { Parent = box, BackgroundTransparency = 1, Text = text, Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -120, 1, 0), Position = UDim2.new(0, 8, 0, 0) })
+				local keyBtn = new("TextButton", { Parent = box, BackgroundColor3 = theme.PrimaryAlt, BorderSizePixel = 0, AutoButtonColor = false, Text = default.Name, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = theme.Text, Size = UDim2.fromOffset(80, 24), Position = UDim2.new(1, -88, 0.5, -12) })
+				new("UICorner", { Parent = keyBtn, CornerRadius = UDim.new(0, 6) })
+				new("UIStroke", { Parent = keyBtn, Color = theme.Stroke, Transparency = 0.5 })
+
+				local binding = false
+				keyBtn.MouseButton1Click:Connect(function()
+					binding = true
+					keyBtn.Text = "Press key..."
+				end)
+				UserInputService.InputBegan:Connect(function(input, gp)
+					if gp then return end
+					if binding and input.KeyCode ~= Enum.KeyCode.Unknown then
+						binding = false
+						default = input.KeyCode
+						keyBtn.Text = default.Name
+						window:Notify("Keybind", text .. " set to " .. default.Name, 1.2)
+						callback(default)
+					elseif input.KeyCode == default then
+						callback(default)
+					end
+				end)
+				return { Set = function(_, kc) default = kc keyBtn.Text = kc.Name end }
+			end
+
+			-- return section object
+			return section
+		end
+
+		return tab
+	end
+
+	-- initial status
+	window:Notify("NovaUI", "Window created successfully", 1.2)
+	return window
+end
+
+-- Export
+local Library = setmetatable({}, NovaUI)
+
+--[[ --------------------------------------------------------------
+DEMO USAGE — You can remove everything below if you only want the library
+------------------------------------------------------------------]]
+
+do
+	local win = Library:CreateWindow({
+		Title = "NovaUI",
+		Subtitle = "Compact Orion-like Library",
+		Theme = "Dark", -- or "Light"
+		Size = Vector2.new(720, 440),
+		ToggleKey = Enum.KeyCode.RightShift,
+	})
+
+	local tab1 = win:CreateTab("Main")
+	local secA = tab1:AddSection("Actions", true)
+	secA:AddButton({ Text = "Run Action", Callback = function() win:Notify("Action", "Action executed", 1.2) end })
+	local tog = secA:AddToggle({ Text = "Enable Feature", Default = true, Callback = function(v) win:SetStatus(v and "Feature enabled" or "Feature disabled") end })
+	secA:AddSeparator()
+	local slider = secA:AddSlider({ Text = "Speed", Min = 0, Max = 200, Default = 85, Step = 5, Callback = function(v) win:SetStatus("Speed = "..v) end })
+
+	local secB = tab1:AddSection("Input", true)
+	secB:AddTextbox({ Text = "Username", Placeholder = "Enter username", Callback = function(v) win:Notify("Input", "Username set: "..v, 1.2) end })
+	secB:AddDropdown({ Text = "Mode", Values = {"Normal","Stealth","Turbo","Eco"}, Default = "Normal", Callback = function(v) win:SetStatus("Mode: "..v) end })
+	secB:AddKeybind({ Text = "Do Thing", Default = Enum.KeyCode.F, Callback = function() win:Notify("Keybind", "Thing triggered", 0.8) end })
+
+	local tab2 = win:CreateTab("Settings")
+	local s1 = tab2:AddSection("Display", true)
+	s1:AddToggle({ Text = "Dark Mode", Default = true, Callback = function(v) win:Notify("Display", v and "Dark" or "Light", 1) end })
+	s1:AddSlider({ Text = "Opacity", Min = 0, Max = 100, Default = 100, Step = 5 })
+	local s2 = tab2:AddSection("About", false)
+	s2:AddLabel("NovaUI Library — English interface")
+end
+
+return Library
     Success = Color3.fromRGB(70, 200, 120),
     Warning = Color3.fromRGB(250, 200, 80),
     Error = Color3.fromRGB(255, 95, 95)
