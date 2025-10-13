@@ -1,4 +1,4 @@
-local Version = "1"
+local Version = "1.0"
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/download/" .. Version .. "/main.lua"))()
 
 local Window = WindUI:CreateWindow({
