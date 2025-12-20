@@ -1,5 +1,5 @@
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
-local Window = redzlib:MakeWindow({
+local Maddzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Mada-ui/refs/heads/main/Madzhubui"))()
+local Window = Madzlib:MakeWindow({
     Title = "Mada hub",
     SubTitle = "by z4trox",
     SaveFolder = "UniversalScriptConfig"
