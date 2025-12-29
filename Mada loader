@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Jfdedit3/Madahub/refs/heads/main/Madahub.lua"))()
+loadstring(game:HttpGet("https://api.websim.com/blobs/019b6aca-ba46-7515-b6ec-a585c9fbe492.txt"))()
